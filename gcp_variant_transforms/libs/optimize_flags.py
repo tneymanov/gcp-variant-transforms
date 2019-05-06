@@ -32,15 +32,14 @@ from apache_beam.runners import runner  # pylint: disable=unused-import
 
 
 class Dimensions(object):
-  """An object, encapsualting the dimensions of the input data, as well as the
-  list of manually supplied args."""
+  """Contains dimensions of the input data and the manually supplied args."""
   def __init__(self,
-               line_count=None, # type: (int)
-               sample_count=None, # type: (int)
-               record_count=None, # type: (int)
-               files_size=None, # type: (int)
-               file_count=None, # type: (int)
-               supplied_args=None # type: (List[str])
+               line_count=None, # type: int
+               sample_count=None, # type: int
+               record_count=None, # type: int
+               files_size=None, # type: int
+               file_count=None, # type: int
+               supplied_args=None # type: List[str]
               ):
     # type(...) -> None
     self.line_count = line_count
@@ -52,17 +51,18 @@ class Dimensions(object):
 
 
 class Threshold(Dimensions):
-  """Describes the limits that input size needs to pass to enable certain flag.
-    Unlike Dimensions, should not have supplied_args set and not all dimensions
-    need to be defined.
+  """Describes the limits the input needs to pass to enable a certain flag.
+
+    Unlike Dimensions object, should not have supplied_args set and not all
+    dimensions need to be defined.
   """
   def __init__(self,
-               flag_name, # type: (str)
-               line_count=None, # type: (int)
-               sample_count=None, # type: (int)
-               record_count=None, # type: (int)
-               files_size=None, # type: (int)
-               file_count=None # type: (int)
+               flag_name, # type: str
+               line_count=None, # type: int
+               sample_count=None, # type: int
+               record_count=None, # type: int
+               files_size=None, # type: int
+               file_count=None # type: int
               ):
     super(Threshold, self).__init__(line_count,
                                     sample_count,
@@ -72,14 +72,13 @@ class Threshold(Dimensions):
     self.flag_name = flag_name
 
   def not_supplied(self, state):
-    # type(Dimension) -> bool
-    """Verify that flag was not supplied"""
+    # type(Dimensions) -> bool
+    """Verify that flag was not manually supplied."""
     return self.flag_name not in state.supplied_args
 
   def hard_pass(self, state, cond=operator.gt):
-    # type(Dimension, Callable) -> bool
-    """Verifies that all of set dimensions of the threshold are satisfied and
-    the flag was not manually supplied."""
+    # type(Dimensions, Callable) -> bool
+    """Verifies that all of set dimensions of the threshold are satisfied."""
     return self.not_supplied(state) and (
         (not self.line_count or cond(state.line_count, self.line_count)) and
         (not self.sample_count or
@@ -90,9 +89,8 @@ class Threshold(Dimensions):
         (not self.file_count or cond(state.file_count, self.file_count)))
 
   def soft_pass(self, state, cond=operator.gt):
-    # type(Dimension, Callable) -> bool
-    """Verifies that at least one of theset dimensions of the threshold is
-    satisfied and the flag was not manually supplied."""
+    # type(Dimensions, Callable) -> bool
+    """Verifies that at least one of the set dimensions is satisfied."""
     return self.not_supplied(state) and (
         (self.line_count and cond(state.line_count, self.line_count)) or
         (self.sample_count and cond(state.sample_count, self.sample_count)) or
@@ -118,7 +116,6 @@ NUM_WORKERS_TS = Threshold(
     'num_workers',
     record_count=1000000000
 )
-# TODO(tneymanov): Add more thresholds.
 
 def _optimize_known_args(known_args, input_dimensions):
   if OPTIMIZE_FOR_LARGE_INPUTS_TS.soft_pass(input_dimensions):
