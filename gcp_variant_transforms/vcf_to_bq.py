@@ -269,11 +269,12 @@ def _get_input_dimensions(known_args, pipeline_args):
     raise ValueError('Exactly 5 estimates were expected in {}.'.format(
         temp_estimated_input_size_file_path))
 
-  known_args.estimated_variant_count = int(estimates[0].strip())
-  known_args.estimated_sample_count = int(estimates[1].strip())
-  known_args.estimated_value_count = int(estimates[2].strip())
-  known_args.files_size = int(estimates[3].strip())
-  known_args.file_count = int(estimates[4].strip())
+  return optimize_flags.Dimensions(
+      line_count=int(estimates[0].strip()),
+      sample_count=int(estimates[1].strip()),
+      value_count=int(estimates[2].strip()),
+      files_size=int(estimates[3].strip()),
+      file_count=int(estimates[4].strip()))
 
 
 def _annotate_vcf_files(all_patterns, known_args, pipeline_args):
@@ -412,8 +413,13 @@ def run(argv=None):
 
   if known_args.auto_flags_experiment:
     supplied_args = pipeline_common.extract_supplied_args(argv)
-    _get_input_dimensions(known_args, pipeline_args)
-    optimize_flags.optimize_flags(supplied_args, known_args, pipeline_args)
+    input_dimensions = _get_input_dimensions(known_args, pipeline_args)
+    optimize_flags.optimize_flags(supplied_args,
+                                  known_args,
+                                  pipeline_args,
+                                  input_dimensions)
+
+  return
 
   annotated_vcf_pattern = _run_annotation_pipeline(known_args, pipeline_args)
 

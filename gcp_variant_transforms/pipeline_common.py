@@ -78,9 +78,11 @@ def parse_args(argv, command_line_options):
 
 
 def extract_supplied_args(args):
-  # type (List[str]) -> List[str]
-  """Filters out all manually supplied arguments from argv by finding args that
-    start with '--', then droping the prefix and potentially '=*' suffix.
+  # type: (List[str]) -> List[str]
+  """Extract a list of arguments manually specifed by user.
+
+  Filters out all manually supplied arguments from argv by finding args that
+  start with '--', then droping the prefix and potentially '=*' suffix.
   """
   supplied_args = []
   for arg in args or sys.argv:

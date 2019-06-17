@@ -1,4 +1,4 @@
-# Copyright 2019 Google Inc.  All Rights Reserved.
+# Copyright 2019 Google LLC.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -62,25 +62,29 @@ class OptimizeFlagsTest(unittest.TestCase):
     self.known_args, self.pipeline_args = (
         make_known_args_with_default_values(TOOL_OPTIONS))
     self.supplied_args = []
+    self.dimensions = None
 
   def _set_up_dimensions(
       self,
       line_count,
       sample_count,
-      record_count,
+      value_count,
       files_size,
       file_count):
-    self.known_args.estimated_line_count = line_count
-    self.known_args.estimated_sample_count = sample_count
-    self.known_args.estimated_record_count = record_count
-    self.known_args.files_size = files_size
-    self.known_args.file_count = file_count
+    self.dimensions = optimize_flags.Dimensions(
+        line_count=line_count,
+        sample_count=sample_count,
+        value_count=value_count,
+        files_size=files_size,
+        file_count=file_count)
 
   def _run_tests(self):
-    optimize_flags.optimize_flags(
-        self.supplied_args, self.known_args, self.pipeline_args)
+    optimize_flags.optimize_flags(self.supplied_args,
+                                  self.known_args,
+                                  self.pipeline_args,
+                                  self.dimensions)
 
-  def test_optimize_for_large_inputs_passes_records(self):
+  def test_optimize_for_large_inputs_passes_values(self):
     self._set_up_dimensions(1, 1, 3000000001, 1, 1)
     self.known_args.optimize_for_large_inputs = False
 
@@ -138,7 +142,7 @@ class OptimizeFlagsTest(unittest.TestCase):
 
     self.assertEqual(self.known_args.infer_headers, False)
 
-  def test_num_bigquery_write_shards_passes_records(self):
+  def test_num_bigquery_write_shards_passes_values(self):
     self._set_up_dimensions(1, 1, 1000000001, 500000000000, 1)
     self.known_args.num_bigquery_write_shards = 1
 
@@ -171,7 +175,7 @@ class OptimizeFlagsTest(unittest.TestCase):
 
     self.assertEqual(self.known_args.num_bigquery_write_shards, 1)
 
-  def test_num_workers_passes_records(self):
+  def test_num_workers_passes_values(self):
     self._set_up_dimensions(1, 1, 1000000001, 1, 1)
     self.known_args.run_annotation_pipeline = False
     self.pipeline_args.num_workers = 1
@@ -208,16 +212,24 @@ class OptimizeFlagsTest(unittest.TestCase):
 
     self.assertEqual(self.pipeline_args.num_workers, 1)
 
-  def test_shard_variants_passes(self):
-    self._set_up_dimensions(1, 1, 1000000000, 1, 1)
+  def test_shard_variants_passes_already_sharded(self):
+    self._set_up_dimensions(19999, 1, 10000000, 1, 1)
     self.known_args.shard_variants = True
 
     self._run_tests()
 
     self.assertEqual(self.known_args.shard_variants, False)
 
-  def test_shard_variants_fails(self):
-    self._set_up_dimensions(1, 1, 1000000001, 1, 1)
+  def test_shard_variants_passes_not_large_enough(self):
+    self._set_up_dimensions(20000, 1, 9999999, 1, 1)
+    self.known_args.shard_variants = True
+
+    self._run_tests()
+
+    self.assertEqual(self.known_args.shard_variants, False)
+
+  def test_shard_variants_fails_(self):
+    self._set_up_dimensions(20000, 1, 10000000, 1, 1)
     self.known_args.shard_variants = True
 
     self._run_tests()
@@ -225,7 +237,7 @@ class OptimizeFlagsTest(unittest.TestCase):
     self.assertEqual(self.known_args.shard_variants, True)
 
   def test_shard_variants_supplied(self):
-    self._set_up_dimensions(1, 1, 1000000000, 1, 1)
+    self._set_up_dimensions(19999, 1, 9999999, 1, 1)
     self.supplied_args = ['shard_variants']
     self.known_args.shard_variants = True
 
