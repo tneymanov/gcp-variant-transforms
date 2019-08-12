@@ -82,7 +82,7 @@ class CustomCommands(setuptools.Command):
         for command in PYSAM_DEPENDENCY_COMMANDS:
           self.RunCustomCommand(command)
       self.RunCustomCommand(PYSAM_INSTALLATION_COMMAND)
-        
+
     except RuntimeError:
       raise RuntimeError(
           'PySam installation has failed. Make sure you have the ' + \
