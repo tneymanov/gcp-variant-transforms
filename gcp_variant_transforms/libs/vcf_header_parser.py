@@ -14,9 +14,10 @@
 
 """Helper library for reading VCF headers from multiple files."""
 
-from __future__ import absolute_import
+
 
 import vcf
+from pysam import libcbcf
 
 from apache_beam.io.filesystems import FileSystems
 from gcp_variant_transforms.beam_io import vcf_header_io
@@ -40,7 +41,8 @@ def get_vcf_headers(input_file):
   if not FileSystems.exists(input_file):
     raise ValueError('VCF header does not exist')
   try:
-    vcf_reader = vcf.Reader(fsock=_line_generator(input_file))
+    #vcf_reader = vcf.Reader(fsock=_line_generator(input_file))
+    vcf_reader = libcbcf.VariantFile(input_file, 'r')
   except (SyntaxError, StopIteration) as e:
     raise ValueError('Invalid VCF header in %s: %s' % (input_file, str(e)))
   return vcf_header_io.VcfHeader(infos=vcf_reader.infos,

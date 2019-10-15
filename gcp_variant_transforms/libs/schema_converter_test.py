@@ -14,7 +14,7 @@
 
 """Tests for `schema_converter` module."""
 
-from __future__ import absolute_import
+
 
 from collections import OrderedDict
 from typing import List, Union  # pylint: disable=unused-import
@@ -221,7 +221,7 @@ class ConvertTableSchemaToJsonAvroSchemaTest(
   def _validate_schema(self, expected_fields, actual_schema):
     super(ConvertTableSchemaToJsonAvroSchemaTest, self)._validate_schema(
         expected_fields, actual_schema)
-    avro_schema = avro.schema.parse(
+    avro_schema = avro.schema.Parse(
         schema_converter.convert_table_schema_to_json_avro_schema(
             actual_schema))
     self.assertEqual(expected_fields,
@@ -634,7 +634,7 @@ def _get_fields_from_avro_type(field_or_schema, prefix):
   name = field_or_schema.name
   if name and name not in fields and name != 'TBD':
     fields.extend([prefix + field_or_schema.name])
-  if field_or_schema.get_prop('fields'):
+  if 'fields' in field_or_schema.props.keys():
     child_prefix = prefix
     if name != 'TBD':
       child_prefix = prefix + field_or_schema.name + '.'

@@ -14,7 +14,7 @@
 
 """Utility functions and classes for testing."""
 
-from __future__ import absolute_import
+
 
 import bz2
 import gzip
@@ -63,17 +63,19 @@ class TempDir(object):
     f = tempfile.NamedTemporaryFile(delete=False,
                                     dir=self._tempdir,
                                     suffix=suffix)
-    if not lines:
+    if lines:
+      lines = list(map(lambda x: x.encode('utf-8'), lines))
+    else:
       return f.name
     if compression_type in (filesystem.CompressionTypes.UNCOMPRESSED,
                             filesystem.CompressionTypes.AUTO):
-      f.write(''.join(lines))
+      f.write(b''.join(lines))
     elif compression_type == filesystem.CompressionTypes.GZIP:
       with gzip.GzipFile(f.name, 'w') as gzip_file:
-        gzip_file.write(''.join(lines))
+        gzip_file.write(b''.join(lines))
     elif compression_type == filesystem.CompressionTypes.BZIP2:
       with bz2.BZ2File(f.name, 'w') as bzip_file:
-        bzip_file.write(''.join(lines))
+        bzip_file.write(b''.join(lines))
     else:
       raise ValueError('Unsupported CompressionType.')
 

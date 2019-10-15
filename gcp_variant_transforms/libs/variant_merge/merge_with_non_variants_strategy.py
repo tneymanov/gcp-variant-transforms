@@ -14,7 +14,7 @@
 
 """Variant merge stategy that can handle both Variants and Non-variants."""
 
-from __future__ import absolute_import
+
 
 import collections
 import copy
@@ -133,8 +133,11 @@ class MergeWithNonVariantsStrategy(variant_merge_strategy.VariantMergeStrategy):
       for non_variant in overlapping_variants[1:]:
         merged_non_variant.names.extend(non_variant.names)
         merged_non_variant.filters.extend(non_variant.filters)
-        merged_non_variant.quality = min(merged_non_variant.quality,
-                                         non_variant.quality)
+        if (non_variant.quality and
+            (not merged_non_variant.quality or
+             merged_non_variant.quality > non_variant.quality)):
+          merged_non_variant.quality = non_variant.quality
+
         merged_non_variant.calls.extend(non_variant.calls)
 
       merged_non_variant.names = sorted(set(merged_non_variant.names))
@@ -147,7 +150,7 @@ class MergeWithNonVariantsStrategy(variant_merge_strategy.VariantMergeStrategy):
 
   def _merge_variants(self, grouped_variants):
     merged_variants = []
-    for merge_key, variants in grouped_variants.iteritems():
+    for merge_key, variants in list(grouped_variants.items()):
       merged_variants.extend(
           self._move_to_calls.get_merged_variants(variants, merge_key))
     return merged_variants

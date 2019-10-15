@@ -148,7 +148,7 @@ def _get_file_names(input_file):
   if not filesystems.FileSystems.exists(input_file):
     raise ValueError('Input file {} doesn\'t exist'.format(input_file))
   with filesystems.FileSystems.open(input_file) as f:
-    contents = map(str.strip, f.readlines())
+    contents = list(map(str.strip, f.readlines()))
     if not contents:
       raise ValueError('Input file {} is empty.'.format(input_file))
     return contents
@@ -206,8 +206,9 @@ def read_variants(
     all_patterns,  # type: List[str]
     pipeline_mode,  # type: PipelineModes
     allow_malformed_records,  # type: bool
+    infer_headers,  #type: bool
     representative_header_lines=None,  # type: List[str]
-    vcf_parser=vcfio.VcfParserType.PYVCF  # type: vcfio.VcfParserType
+    vcf_parser=vcfio.VcfParserType.PYSAM  # type: vcfio.VcfParserType
     ):
   # type: (...) -> pvalue.PCollection
   """Returns a PCollection of Variants by reading VCFs."""
@@ -234,6 +235,7 @@ def read_variants(
         representative_header_lines=representative_header_lines,
         compression_type=compression_type,
         allow_malformed_records=allow_malformed_records,
+        infer_headers=
         vcf_parser_type=vcf_parser)
 
   if compression_type == filesystem.CompressionTypes.GZIP:

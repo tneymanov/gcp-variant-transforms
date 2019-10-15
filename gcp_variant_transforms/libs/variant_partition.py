@@ -24,7 +24,7 @@ This class has 2 main operating modes:
      available at gcp_variant_transforms/testing/data/misc/*.yaml
 """
 
-from __future__ import absolute_import
+
 
 from collections import defaultdict
 import re
@@ -255,7 +255,7 @@ class VariantPartition(object):
         if chr_no > 0 and chr_no <= _RESERVED_AUTO_PARTITIONS:
           partition_index = chr_no - 1
           self._ref_name_to_partitions_map[reference_name].add_region(
-              0, sys.maxint, partition_index)
+              0, sys.maxsize, partition_index)
           return partition_index
       # If RegExp didn't match, we will find the hash of reference_name
       remaining_partitions = _DEFAULT_NUM_PARTITIONS - _RESERVED_AUTO_PARTITIONS
@@ -263,7 +263,7 @@ class VariantPartition(object):
                          _RESERVED_AUTO_PARTITIONS)
       # Save partition in _reference_name_to_partition dict for future lookups
       self._ref_name_to_partitions_map[reference_name].add_region(
-          0, sys.maxint, partition_index)
+          0, sys.maxsize, partition_index)
       return partition_index
 
   def should_flatten(self):

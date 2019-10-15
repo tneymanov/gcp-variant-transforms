@@ -14,7 +14,7 @@
 
 """A source for reading VCF file headers."""
 
-from __future__ import absolute_import
+
 
 from collections import OrderedDict
 from functools import partial
@@ -150,9 +150,9 @@ class VcfHeaderSource(filebasedsource.FileBasedSource):
   def _read_headers(self, file_path):
     with self.open_file(file_path) as file_to_read:
       while True:
-        record = file_to_read.readline()
+        record = file_to_read.readline().decode('utf-8')
         while not record or not record.strip():  # Skip empty lines.
-          record = file_to_read.readline()
+          record = file_to_read.readline().decode('utf-8')
         if record and record.startswith('#'):
           yield record
         else:
@@ -271,7 +271,7 @@ class WriteVcfHeaderFn(beam.DoFn):
   """A DoFn for writing VCF headers to a file."""
 
   HEADER_TEMPLATE = '##{}=<{}>\n'
-  FINAL_HEADER_LINE = '#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT\n'
+  FINAL_HEADER_LINE = b'#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT\n'
 
   def __init__(self, file_path):
     # type: (str) -> None
@@ -282,7 +282,7 @@ class WriteVcfHeaderFn(beam.DoFn):
     # type: (VcfHeader, str) -> None
     with FileSystems.create(self._file_path) as self._file_to_write:
       if vcf_version_line:
-        self._file_to_write.write(vcf_version_line)
+        self._file_to_write.write(vcf_version_line.encode('utf-8'))
       self._write_headers_by_type(HeaderTypeConstants.INFO, header.infos)
       self._write_headers_by_type(HeaderTypeConstants.FILTER, header.filters)
       self._write_headers_by_type(HeaderTypeConstants.ALT, header.alts)
@@ -299,9 +299,9 @@ class WriteVcfHeaderFn(beam.DoFn):
       headers: Each value of headers is a dictionary that describes a single VCF
         header line.
     """
-    for header in headers.values():
+    for header in list(headers.values()):
       self._file_to_write.write(
-          self._to_vcf_header_line(header_type, header))
+          self._to_vcf_header_line(header_type, header).encode('utf-8'))
 
   def _to_vcf_header_line(self, header_type, header):
     # type: (str, Dict[str, Union[str, int]]) -> str
@@ -330,9 +330,10 @@ class WriteVcfHeaderFn(beam.DoFn):
       A formatted string composed of header keys and values.
     """
     formatted_values = []
-    for key, value in header.iteritems():
+    for key, value in list(header.items()):
       if self._should_include_key_value(key, value):
         formatted_values.append(self._format_header_key_value(key, value))
+
     return ','.join(formatted_values)
 
   def _should_include_key_value(self, key, value):
@@ -402,7 +403,7 @@ class WriteVcfHeaderFn(beam.DoFn):
       return None
     elif number >= 0:
       return str(number)
-    number_to_string = {v: k for k, v in vcf.parser.field_counts.items()}
+    number_to_string = {v: k for k, v in list(vcf.parser.field_counts.items())}
     if number in number_to_string:
       return number_to_string[number]
     else:
@@ -410,8 +411,8 @@ class WriteVcfHeaderFn(beam.DoFn):
 
   def _format_string_value(self, value):
     # type: (str, unicode) -> str
-    if isinstance(value, unicode):
-      return '"{}"'.format(value.encode('utf-8'))
+    if isinstance(value, bytes):
+      return '"{}"'.format(value.decode('utf-8'))
     return '"{}"'.format(value)
 
 

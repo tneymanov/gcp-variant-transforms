@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
+
 
 import unittest
 
@@ -97,8 +97,9 @@ class VepRunnerTest(unittest.TestCase):
 
   def test_instantiation_bad_pipeline_options(self):
     """This is to test object construction fails with incomplete arguments."""
-    with self.assertRaisesRegexp(ValueError, '.*project.*'):
+    with self.assertRaisesRegex(ValueError, '.*project.*'):
       self._create_test_instance(pipeline_args=['no_arguments'])
+
 
   def test_make_vep_cache_path(self):
     test_instance = self._create_test_instance()
@@ -131,9 +132,9 @@ class VepRunnerTest(unittest.TestCase):
 
   def _validate_run_for_all_files(self):
     self._pipelines_spy.validate_calls([f[0] for f in _INPUT_FILES_WITH_SIZE])
-
+  #@unittest.skip(True)
   def test_run_on_all_files(self):
-    num_workers = len(_INPUT_FILES_WITH_SIZE) / 2 + 1
+    num_workers = len(_INPUT_FILES_WITH_SIZE) // 2 + 1
     test_instance = self._create_test_instance(
         self._get_pipeline_args(num_workers))
     with patch('apache_beam.io.filesystems.FileSystems', _MockFileSystems):
@@ -162,7 +163,7 @@ class VepRunnerTest(unittest.TestCase):
     test_instance = self._create_test_instance()
     with patch('apache_beam.io.filesystems.FileSystems', _MockFileSystems):
       test_instance.run_on_all_files()
-      with self.assertRaisesRegexp(AssertionError, '.*already.*running.*'):
+      with self.assertRaisesRegex(AssertionError, '.*already.*running.*'):
         # Since there are running operations, the next call raises an exception.
         test_instance.run_on_all_files()
       test_instance.wait_until_done()
@@ -182,7 +183,7 @@ class VepRunnerTest(unittest.TestCase):
     test_instance = self._create_test_instance()
     with patch('apache_beam.io.filesystems.FileSystems', _MockFileSystems):
       test_instance.run_on_all_files()
-      with self.assertRaisesRegexp(RuntimeError, '.*failed.*retries.*'):
+      with self.assertRaisesRegex(RuntimeError, '.*failed.*retries.*'):
         test_instance.wait_until_done()
 
 
@@ -224,6 +225,7 @@ class PipelinesSpy(object):
 
 
 class GetBaseNameTest(unittest.TestCase):
+
   def test_get_base_name(self):
     self.assertEqual('t.vcf', vep_runner._get_base_name('a/b/t.vcf'))
     self.assertEqual('t.vcf', vep_runner._get_base_name('/a/b/t.vcf'))

@@ -31,14 +31,14 @@ PYSAM_INSTALLATION_COMMAND = ['pip', 'install', 'pysam>=0.15.3']
 
 REQUIRED_PACKAGES = [
     'cython>=0.28.1',
-    'apache-beam[gcp]',
+    'apache-beam[gcp]==2.14.0',
+    'python-docx',
     # Note that adding 'google-api-python-client>=1.6' causes some dependency
     # mismatch issues. This is fatal if using 'setup.py install', but works on
     # 'pip install .' as it ignores conflicting versions. See Issue #71.
     'google-api-python-client>=1.6',
     'intervaltree>=2.1.0,<2.2.0',
     'pyvcf<0.7.0',
-    'google-nucleus==0.2.0',
     # Nucleus needs uptodate protocol buffer compiler (protoc).
     'protobuf>=3.6.1',
     'mmh3<2.6',
@@ -63,7 +63,7 @@ class CustomCommands(setuptools.Command):
     pass
 
   def RunCustomCommand(self, command_list):
-    print 'Running command: %s' % command_list
+    print('Running command: %s' % command_list)
     try:
       subprocess.call(command_list)
     except Exception as e:
