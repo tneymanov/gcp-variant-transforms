@@ -14,7 +14,7 @@
 
 """Helper library for reading VCF headers from multiple files."""
 
-from __future__ import absolute_import
+
 
 import vcf
 

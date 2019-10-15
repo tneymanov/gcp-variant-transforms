@@ -87,11 +87,11 @@ class VcfHeaderSourceTest(unittest.TestCase):
         '#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	GS000016676-ASM\n',
     ]
     header = self._create_file_and_read_headers()
-    self.assertItemsEqual(header.contigs.keys(), ['M', 'P'])
-    self.assertItemsEqual(header.alts.keys(), ['CGA_CNVWIN', 'INS:ME:MER'])
-    self.assertItemsEqual(header.filters.keys(), ['MPCBT'])
-    self.assertItemsEqual(header.infos.keys(), ['CGA_MIRB'])
-    self.assertItemsEqual(header.formats.keys(), ['FT'])
+    self.assertCountEqual(list(header.contigs.keys()), ['M', 'P'])
+    self.assertCountEqual(list(header.alts.keys()), ['CGA_CNVWIN', 'INS:ME:MER'])
+    self.assertCountEqual(list(header.filters.keys()), ['MPCBT'])
+    self.assertCountEqual(list(header.infos.keys()), ['CGA_MIRB'])
+    self.assertCountEqual(list(header.formats.keys()), ['FT'])
 
   def test_empty_header_raises_error(self):
     self.lines = testdata_util.get_sample_vcf_record_lines()
@@ -246,7 +246,8 @@ class WriteVcfHeadersTest(unittest.TestCase):
     ]
     header = _get_vcf_header_from_lines(self.lines)
     header_fn = WriteVcfHeaderFn('')
-    actual = header_fn._to_vcf_header_line('INFO', header.infos.values()[0])
+    actual = header_fn._to_vcf_header_line(
+        'INFO', list(header.infos.values())[0])
     expected = self.lines[0]
     self.assertEqual(actual, expected)
 
@@ -257,7 +258,8 @@ class WriteVcfHeadersTest(unittest.TestCase):
     ]
     header = _get_vcf_header_from_lines(self.lines)
     header_fn = WriteVcfHeaderFn('')
-    actual = header_fn._to_vcf_header_line('contig', header.contigs.values()[0])
+    actual = header_fn._to_vcf_header_line(
+        'contig', list(header.contigs.values())[0])
     expected = '##contig=<ID=M,length=16>\n'
     self.assertEqual(actual, expected)
 
@@ -272,10 +274,10 @@ class WriteVcfHeadersTest(unittest.TestCase):
     header = _get_vcf_header_from_lines(self.lines)
     header_fn = WriteVcfHeaderFn('')
     actual = []
-    for info in header.infos.values():
+    for info in list(header.infos.values()):
       actual.append(header_fn._to_vcf_header_line('INFO', info))
     expected = self.lines[:-1]
-    self.assertItemsEqual(actual, expected)
+    self.assertCountEqual(actual, expected)
 
   def test_write_headers(self):
     header = _get_vcf_header_from_lines(self.lines)
@@ -305,8 +307,8 @@ class WriteVcfHeadersTest(unittest.TestCase):
       header_fn = WriteVcfHeaderFn(tempfile)
       header_fn.process(header, vcf_version_line)
       with open(tempfile, 'rb') as f:
-        actual = f.readlines()
-        self.assertItemsEqual(actual, expected_results)
+        actual = list(map(lambda x: x.decode('utf-8'), f.readlines()))
+        self.assertCountEqual(actual, expected_results)
 
   def _remove_sample_names(self, line):
     # Return line with all columns except sample names.
@@ -314,10 +316,10 @@ class WriteVcfHeadersTest(unittest.TestCase):
 
   def _assert_file_contents_equal(self, file_name, lines):
     with open(file_name, 'rb') as f:
-      actual = f.read().splitlines()
+      actual = list(map(lambda x: x.decode('utf-8'), f.read().splitlines()))
       expected = [s.strip() for s in lines[1:]]
       expected[-1] = self._remove_sample_names(expected[-1])
-      self.assertItemsEqual(actual, expected)
+      self.assertCountEqual(actual, expected)
 
   def test_write_dataflow(self):
     header = _get_vcf_header_from_lines(self.lines)

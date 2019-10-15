@@ -14,7 +14,7 @@
 
 """Unit tests for variant_partition module."""
 
-from __future__ import absolute_import
+
 
 import unittest
 
@@ -30,10 +30,10 @@ class VariantPartitionTest(unittest.TestCase):
                      variant_partition._DEFAULT_NUM_PARTITIONS)
 
     # Checking standard reference_name formatted as: 'chr[0-9][0-9]'
-    for i in xrange(variant_partition._RESERVED_AUTO_PARTITIONS):
+    for i in range(variant_partition._RESERVED_AUTO_PARTITIONS):
       self.assertEqual(partitioner.get_partition('chr' + str(i + 1)), i)
     # Checking standard reference_name formatted as: '[0-9][0-9]'
-    for i in xrange(variant_partition._RESERVED_AUTO_PARTITIONS):
+    for i in range(variant_partition._RESERVED_AUTO_PARTITIONS):
       self.assertEqual(partitioner.get_partition(str(i + 1)), i)
 
     # Every other reference_name will be assigned to partitions >= 22
@@ -60,13 +60,13 @@ class VariantPartitionTest(unittest.TestCase):
     self.assertEqual(partitioner.get_num_partitions(),
                      variant_partition._DEFAULT_NUM_PARTITIONS)
 
-    with self.assertRaisesRegexp(ValueError, 'Cannot partition given input*'):
+    with self.assertRaisesRegex(ValueError, 'Cannot partition given input*'):
       partitioner.get_partition('chr1', -1)
 
-    with self.assertRaisesRegexp(ValueError, 'Cannot partition given input*'):
+    with self.assertRaisesRegex(ValueError, 'Cannot partition given input*'):
       partitioner.get_partition('', 1)
 
-    with self.assertRaisesRegexp(ValueError, 'Cannot partition given input*'):
+    with self.assertRaisesRegex(ValueError, 'Cannot partition given input*'):
       partitioner.get_partition('  ', 1)
 
   def test_config_boundaries(self):
@@ -162,10 +162,10 @@ class VariantPartitionTest(unittest.TestCase):
     self.assertFalse(partitioner.should_flatten())
     self.assertEqual(partitioner.get_num_partitions(), 8)
 
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, 'Given partition index -1 is outside of expected range*'):
       partitioner.get_partition_name(-1)
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, 'Given partition index 8 is outside of expected range*'):
       partitioner.get_partition_name(8)
 
@@ -262,7 +262,7 @@ class VariantPartitionTest(unittest.TestCase):
         '     partition_name: "missing_region"',
         '     regions:',
     ]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         'Each partition must have at least one region.'):
       _ = variant_partition.VariantPartition(
@@ -276,7 +276,7 @@ class VariantPartitionTest(unittest.TestCase):
         '     regions:',
         '       - "chr1:0-1,000,000"',
     ]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         'Each partition must have partition_name field.'):
       _ = variant_partition.VariantPartition(
@@ -288,7 +288,7 @@ class VariantPartitionTest(unittest.TestCase):
         '     regions:',
         '       - "chr1:0-1,000,000"',
     ]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         'Partition name can not be empty string.'):
       _ = variant_partition.VariantPartition(
@@ -311,7 +311,7 @@ class VariantPartitionTest(unittest.TestCase):
         '     regions:',
         '       - "residual"',
     ]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         'There must be only one residual partition.'):
       _ = variant_partition.VariantPartition(
@@ -330,7 +330,7 @@ class VariantPartitionTest(unittest.TestCase):
         '     regions:',
         '       - "chr1:999,999-2,000,000"',
     ]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, 'Cannot add overlapping region *'):
       _ = variant_partition.VariantPartition(
           tempdir.create_temp_file(suffix='.yaml',
@@ -346,7 +346,7 @@ class VariantPartitionTest(unittest.TestCase):
         '     regions:',
         '       - "chr1:1,000,000-2,000,000"',
     ]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, 'Cannot add overlapping region *'):
       _ = variant_partition.VariantPartition(
           tempdir.create_temp_file(suffix='.yaml',
@@ -362,7 +362,7 @@ class VariantPartitionTest(unittest.TestCase):
         '     regions:',
         '       - "chr1"',
     ]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, 'Cannot add overlapping region *'):
       _ = variant_partition.VariantPartition(
           tempdir.create_temp_file(suffix='.yaml',
@@ -382,7 +382,7 @@ class VariantPartitionTest(unittest.TestCase):
         '     regions:',
         '       - "chr1"',
     ]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError, 'Cannot add overlapping region *'):
       _ = variant_partition.VariantPartition(
           tempdir.create_temp_file(suffix='.yaml',
@@ -404,7 +404,7 @@ class VariantPartitionTest(unittest.TestCase):
         '     regions:',
         '       - "chr1:1,000,000-2,000,000"',
     ]
-    with self.assertRaisesRegexp(
+    with self.assertRaisesRegex(
         ValueError,
         'Partition names must be unique *'):
       _ = variant_partition.VariantPartition(

@@ -14,7 +14,7 @@
 
 """Tests for partition_variants module."""
 
-from __future__ import absolute_import
+
 
 import unittest
 
@@ -83,7 +83,7 @@ class PartitionVariantsTest(unittest.TestCase):
     expected_partitions = self._get_standard_variant_partitions()
     expected_partitions.update(self._get_nonstandard_variant_partitions())
     variants = [variant
-                for variant_list in expected_partitions.values()
+                for variant_list in list(expected_partitions.values())
                 for variant in variant_list]
 
     partitioner = variant_partition.VariantPartition()
@@ -94,7 +94,7 @@ class PartitionVariantsTest(unittest.TestCase):
         | 'PartitionVariants' >> beam.Partition(
             partition_variants.PartitionVariants(partitioner),
             partitioner.get_num_partitions()))
-    for i in xrange(partitioner.get_num_partitions()):
+    for i in range(partitioner.get_num_partitions()):
       assert_that(partitions[i], equal_to(expected_partitions.get(i, [])),
                   label=str(i))
     pipeline.run()

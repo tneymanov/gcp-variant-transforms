@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from __future__ import absolute_import
+
 
 import argparse  # pylint: disable=unused-import
 
@@ -103,7 +103,7 @@ class VcfReadOptions(VariantTransformsOptions):
               'performance penalty of an extra pass over all variants.'))
     parser.add_argument(
         '--vcf_parser',
-        default=vcfio.VcfParserType.PYVCF.name,
+        default=vcfio.VcfParserType.PYSAM.name,
         choices=[parser.name for parser in vcfio.VcfParserType],
         help=('Choose the underlying parser for reading VCF files. Currently '
               'we only support ``{}`` (default), ``{}`` and ``{}``. Note: '

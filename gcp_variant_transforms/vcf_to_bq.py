@@ -31,7 +31,7 @@ python -m gcp_variant_transforms.vcf_to_bq \
   --runner DataflowRunner
 """
 
-from __future__ import absolute_import
+
 
 import argparse  # pylint: disable=unused-import
 import logging
@@ -105,6 +105,7 @@ def _read_variants(all_patterns,  # type: List[str]
       all_patterns,
       pipeline_mode,
       known_args.allow_malformed_records,
+      known_args.infer_headers,
       representative_header_lines,
       vcfio.VcfParserType[known_args.vcf_parser])
 
@@ -385,6 +386,10 @@ def run(argv=None):
   known_args, pipeline_args = pipeline_common.parse_args(argv,
                                                          _COMMAND_LINE_OPTIONS)
 
+  matches = filesystems.FileSystems.match(['../vcf/valid*'])
+  for match in matches:
+    print('match: {}'.format(match))
+  return
   if known_args.auto_flags_experiment:
     _get_input_dimensions(known_args, pipeline_args)
 

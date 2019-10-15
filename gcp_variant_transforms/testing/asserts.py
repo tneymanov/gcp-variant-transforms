@@ -14,21 +14,41 @@
 
 """Custom asserts for tests."""
 
-from __future__ import absolute_import
+
 
 from typing import Callable, List  # pylint: disable=unused-import
 from apache_beam.testing.util import BeamAssertException
 from gcp_variant_transforms.beam_io import vcf_header_io  # pylint: disable=unused-import
 
+def _cmp_dict(dict1, dict2):
+  return (dict1.keys() < dict2.keys() if dict1.keys != dict2.keys else
+          dict1.values() < dict2.values())
+
 
 def items_equal(expected):
   """Returns a function for checking expected and actual have the same items."""
   def _items_equal(actual):
-    sorted_expected = sorted(expected)
-    sorted_actual = sorted(actual)
-    if sorted_expected != sorted_actual:
-      raise BeamAssertException(
-          'Failed assert: %r != %r' % (sorted_expected, sorted_actual))
+    #print('final expected: {}'.format(expected))
+    #print('final actual: {}'.format(actual))
+    """
+    if isinstance(expected[0], dict):
+      sorted_expected = sorted(expected, key = lambda x: sorted(list(x.keys())) + sorted(list(x.values())))
+    else:
+      sorted_expected = sorted(expected)
+    if isinstance(expected[0], dict):
+      sorted_actual = sorted(actual, key = lambda x: sorted(list(x.keys())) + sorted(list(x.values())))
+    else:
+      sorted_actual = sorted(actual)
+    """
+    compare = actual.copy()
+    for e in expected:
+      if e not in compare:
+        raise BeamAssertException(
+            'Failed assert: %r != %r' % (expected, actual))
+      else:
+        compare.remove(e)
+    if compare:
+      raise BeamAssertException('Failed assert: %r != %r' % (expected, actual))
   return _items_equal
 
 

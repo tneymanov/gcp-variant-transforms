@@ -14,7 +14,7 @@
 
 """Utility functions for creating VcfHeader objects used by unit tests."""
 
-from __future__ import absolute_import
+
 
 from vcf import parser
 
@@ -33,7 +33,7 @@ def make_header(header_num_dict):
     header_num_dict: a dictionary mapping info keys to string num values.
   """
   infos = {}
-  for k, v in header_num_dict.iteritems():
+  for k, v in list(header_num_dict.items()):
     if v in parser.field_counts:
       pyvcf_num_field_value = parser.field_counts[v]
     else:

@@ -20,7 +20,7 @@ objects should be used as non-mutable in other scopes, hence all mutating
 functions are "private".
 """
 
-from __future__ import absolute_import
+
 
 import enum
 import logging
@@ -256,7 +256,7 @@ class ProcessedVariantFactory(object):
     """
     proc_var = ProcessedVariant(variant)
     self._variant_counter.inc()
-    for key, variant_info_data in variant.info.iteritems():
+    for key, variant_info_data in list(variant.info.items()):
       if key in self._annotation_field_set:
         self._annotation_processor.add_annotation_data(
             proc_var, key, variant_info_data)
@@ -303,7 +303,7 @@ class ProcessedVariantFactory(object):
         mode=bigquery_util.TableFieldConstants.MODE_NULLABLE,
         description='Alternate base.'))
     if self._split_alternate_allele_info_fields:
-      for key, field in self._header_fields.infos.iteritems():
+      for key, field in list(self._header_fields.infos.items()):
         if (field[_HeaderKeyConstants.NUM] ==
             vcf.parser.field_counts[_FIELD_COUNT_ALTERNATE_ALLELE]):
           alternate_bases_record.fields.append(bigquery.TableFieldSchema(
@@ -473,7 +473,7 @@ class _AnnotationProcessor(object):
     for annotation_str in data:
       try:
         ind, annotation_map = parser.parse_and_match_alt(annotation_str)
-        for name, value in annotation_map.iteritems():
+        for name, value in list(annotation_map.items()):
           if name == annotation_parser.ANNOTATION_ALT:
             continue
           type_key = infer_headers_util.get_inferred_annotation_type_header_key(
