@@ -112,7 +112,7 @@ _BIG_QUERY_TYPE_TO_AVRO_TYPE_MAP = {
 _BIG_QUERY_TYPE_TO_PYTHON_TYPE_MAP = {
     TableFieldConstants.TYPE_INTEGER: int,
     # Bigquery accepts unicode for strings.
-    TableFieldConstants.TYPE_STRING: unicode,
+    TableFieldConstants.TYPE_STRING: str,
     TableFieldConstants.TYPE_FLOAT: float,
     TableFieldConstants.TYPE_BOOLEAN: bool,
 }
@@ -293,7 +293,7 @@ def _get_merged_field_schemas(
     merged_field_schemas.append(field_schema)
 
   for field_schema in field_schemas_2:
-    if field_schema.name not in existing_fields.keys():
+    if field_schema.name not in list(existing_fields.keys()):
       merged_field_schemas.append(field_schema)
     else:
       existing_field_schema = existing_fields.get(field_schema.name)

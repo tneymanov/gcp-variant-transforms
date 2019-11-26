@@ -14,7 +14,7 @@
 
 """A source for reading VCF file headers."""
 
-from __future__ import absolute_import
+
 
 import collections
 from functools import partial
@@ -144,7 +144,7 @@ class VcfHeader(object):
 
   def _get_infos_pysam(self, infos):
     results = collections.OrderedDict()
-    for item in infos.items():
+    for item in list(infos.items()):
       result = collections.OrderedDict()
       result['id'] = item[0]
       result['num'] = item[1].number if item[1].number != '.' else None
@@ -154,47 +154,47 @@ class VcfHeader(object):
       result['source'] = None
       result['version'] = None
       results[item[0]] = result
-    return dict(results.items())
+    return dict(list(results.items()))
 
   def _get_filters_pysam(self, filters):
     results = collections.OrderedDict()
-    for item in filters.items():
+    for item in list(filters.items()):
       result = collections.OrderedDict()
       result['id'] = item[0]
       result['desc'] = item[1].description
       results[item[0]] = result
     # PySAM adds default PASS value to its filters
     del results['PASS']
-    return dict(results.items())
+    return dict(list(results.items()))
 
   def _get_alts_pysam(self, alts):
     results = collections.OrderedDict()
-    for item in alts.items():
+    for item in list(alts.items()):
       result = collections.OrderedDict()
       result['id'] = item[0]
       result['desc'] = item[1]['Description'].strip("\"")
       results[item[0]] = result
-    return dict(results.items())
+    return dict(list(results.items()))
 
   def _get_formats_pysam(self, formats):
     results = collections.OrderedDict()
-    for item in formats.items():
+    for item in list(formats.items()):
       result = collections.OrderedDict()
       result['id'] = item[0]
       result['num'] = item[1].number if item[1].number != '.' else None
       result['type'] = item[1].type
       result['desc'] = item[1].description
       results[item[0]] = result
-    return dict(results.items())
+    return dict(list(results.items()))
 
   def _get_contigs_pysam(self, contigs):
     results = collections.OrderedDict()
-    for item in contigs.items():
+    for item in list(contigs.items()):
       result = collections.OrderedDict()
       result['id'] = item[0]
       result['length'] = item[1].length
       results[item[0]] = result
-    return dict(results.items())
+    return dict(list(results.items()))
 
   def _get_samples_pysam(self, sample_line):
     sample_tags = sample_line.split('\t')
@@ -444,7 +444,7 @@ class WriteVcfHeaderFn(beam.DoFn):
       headers: Each value of headers is a dictionary that describes a single VCF
         header line.
     """
-    for header in headers.values():
+    for header in list(headers.values()):
       self._file_to_write.write(
           self._to_vcf_header_line(header_type, header))
 
@@ -475,7 +475,7 @@ class WriteVcfHeaderFn(beam.DoFn):
       A formatted string composed of header keys and values.
     """
     formatted_values = []
-    for key, value in header.iteritems():
+    for key, value in list(header.items()):
       if self._should_include_key_value(key, value):
         formatted_values.append(self._format_header_key_value(key, value))
     return ','.join(formatted_values)
@@ -554,7 +554,7 @@ class WriteVcfHeaderFn(beam.DoFn):
 
   def _format_string_value(self, value):
     # type: (str, unicode) -> str
-    if isinstance(value, unicode):
+    if isinstance(value, str):
       return '"{}"'.format(value.encode('utf-8'))
     return '"{}"'.format(value)
 

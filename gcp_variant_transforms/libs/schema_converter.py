@@ -14,7 +14,7 @@
 
 """Handles the conversion between BigQuery/Avro schema and VCF header."""
 
-from __future__ import absolute_import
+
 
 from collections import OrderedDict
 import json
@@ -145,7 +145,7 @@ def generate_schema_from_header_fields(
       description=('Phaseset of the call (if any). "*" is used in cases where '
                    'the genotype is phased, but no phase set ("PS" in FORMAT) '
                    'was specified.')))
-  for key, field in header_fields.formats.iteritems():
+  for key, field in list(header_fields.formats.items()):
     # GT and PS are already included in 'genotype' and 'phaseset' fields.
     if key in (vcfio.GENOTYPE_FORMAT_KEY, vcfio.PHASESET_FORMAT_KEY):
       continue
@@ -163,7 +163,7 @@ def generate_schema_from_header_fields(
   info_keys = set()
   annotation_info_type_keys_set = set(
       proc_variant_factory.gen_annotation_info_type_keys())
-  for key, field in header_fields.infos.iteritems():
+  for key, field in list(header_fields.infos.items()):
     # END info is already included by modifying the end_position. Info type
     # fields exist only to indicate the type of corresponding annotation fields,
     # and should not be added to the schema.
@@ -359,7 +359,7 @@ def _add_format_fields(schema, formats, allow_incompatible_schema=False):
   for field in schema.fields:
     if field.name in _CONSTANT_CALL_FIELDS:
       continue
-    elif (field.name in vcf_reserved_fields.FORMAT_FIELDS.keys() and
+    elif (field.name in list(vcf_reserved_fields.FORMAT_FIELDS.keys()) and
           not allow_incompatible_schema):
       reserved_definition = vcf_reserved_fields.FORMAT_FIELDS.get(field.name)
       _validate_reserved_field(field, reserved_definition)
@@ -384,7 +384,7 @@ def _add_info_fields(field, infos, allow_incompatible_schema=False):
     _add_info_fields_from_alternate_bases(field,
                                           infos,
                                           allow_incompatible_schema)
-  elif (field.name in vcf_reserved_fields.INFO_FIELDS.keys() and
+  elif (field.name in list(vcf_reserved_fields.INFO_FIELDS.keys()) and
         not allow_incompatible_schema):
     reserved_definition = vcf_reserved_fields.INFO_FIELDS.get(field.name)
     _validate_reserved_field(field, reserved_definition)
@@ -431,7 +431,7 @@ def _add_info_fields_from_alternate_bases(schema,
           desc=_remove_special_characters(_get_annotation_description(field)),
           source=None,
           version=None)})
-    elif (field.name in vcf_reserved_fields.INFO_FIELDS.keys() and
+    elif (field.name in list(vcf_reserved_fields.INFO_FIELDS.keys()) and
           not allow_incompatible_schema):
       reserved_definition = vcf_reserved_fields.INFO_FIELDS.get(field.name)
       _validate_reserved_field_type(field, reserved_definition)

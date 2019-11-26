@@ -21,7 +21,7 @@ from typing import List  # pylint: disable=unused-import
 import farmhash
 
 
-def generate_unsigned_hash_code(strings, max_hash_value=sys.maxint):
+def generate_unsigned_hash_code(strings, max_hash_value=sys.maxsize):
   # type: (List[str], int) -> int
   """Generates a forever-fixed hash code for `strings`.
 

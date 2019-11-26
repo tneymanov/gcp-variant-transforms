@@ -17,7 +17,7 @@
 The 4.2 spec is available at https://samtools.github.io/hts-specs/VCFv4.2.pdf.
 """
 
-from __future__ import absolute_import
+
 
 from typing import Any, Iterable, List, Tuple  # pylint: disable=unused-import
 from functools import partial
@@ -92,7 +92,7 @@ class _ToVcfRecordCoder(coders.Coder):
       return MISSING_FIELD_VALUE
     elif isinstance(value, list):
       return ','.join([self._encode_value(x) for x in value])
-    return value.encode('utf-8') if isinstance(value, unicode) else str(value)
+    return value.encode('utf-8') if isinstance(value, str) else str(value)
 
   def _encode_variant_info(self, variant):
     """Encodes the info of a :class:`Variant` for a VCF file line."""
@@ -105,7 +105,7 @@ class _ToVcfRecordCoder(coders.Coder):
         and variant.start + len(variant.reference_bases) != variant.end):
       encoded_infos.append('END=%d' % variant.end)
     # Set all other fields of info.
-    for k, v in variant.info.iteritems():
+    for k, v in list(variant.info.items()):
       if v is True:
         encoded_infos.append(k)
       else:
@@ -270,9 +270,10 @@ class ReadFromBGZF(beam.PTransform):
       raise ValueError(
           'Unrecognized vcf_parser_type: %s.' % str(vcf_parser_type))
 
-  def _read_records(self, (file_path, block)):
+  def _read_records(self, xxx_todo_changeme):
     # type: (Tuple[str, Block]) -> Iterable(Variant)
     """Reads records from `file_path` in `block`."""
+    (file_path, block) = xxx_todo_changeme
     record_iterator = self._vcf_parser_class(
         file_path,
         block,
@@ -457,8 +458,9 @@ class _WriteVcfDataLinesFn(beam.DoFn):
   def __init__(self):
     self._coder = _ToVcfRecordCoder()
 
-  def process(self, (file_path, variants), *args, **kwargs):
+  def process(self, xxx_todo_changeme1, *args, **kwargs):
     # type: (Tuple[str, List[Variant]]) -> None
+    (file_path, variants) = xxx_todo_changeme1
     with filesystems.FileSystems.create(file_path) as file_to_write:
       for variant in variants:
         file_to_write.write(self._coder.encode(variant))

@@ -97,7 +97,7 @@ class TestRunner(object):
     """Waits until all operations are done."""
     while self._test_names_to_processes:
       time.sleep(10)
-      running_test_names = self._test_names_to_processes.keys()
+      running_test_names = list(self._test_names_to_processes.keys())
       for test_name in running_test_names:
         running_proc = self._test_names_to_processes.get(test_name)
         return_code = running_proc.poll()
@@ -121,7 +121,7 @@ class TestRunner(object):
     """Prints results of test cases."""
     for test_cases in self._tests:
       for test_case in test_cases:
-        print '{} ...ok'.format(test_case.get_name())
+        print(('{} ...ok'.format(test_case.get_name())))
     return 0
 
 

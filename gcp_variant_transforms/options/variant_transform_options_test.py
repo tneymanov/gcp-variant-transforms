@@ -105,14 +105,14 @@ class BigQueryWriteOptionsTest(unittest.TestCase):
     args = self._make_args(['--append', 'False',
                             '--output_table', 'project:dataset.table'])
     client = mock.Mock()
-    with self.assertRaisesRegexp(ValueError, 'project:dataset.table '):
+    with self.assertRaisesRegex(ValueError, 'project:dataset.table '):
       self._options.validate(args, client)
 
     args = self._make_args(['--append', 'False',
                             '--output_table', 'project:dataset.table',
                             '--generate_sample_info_table'])
     client = mock.Mock()
-    with self.assertRaisesRegexp(ValueError,
+    with self.assertRaisesRegex(ValueError,
                                  'project:dataset.table_sample_info'):
       self._options.validate(args, client)
 

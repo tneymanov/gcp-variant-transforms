@@ -17,7 +17,7 @@
 The 4.2 spec is available at https://samtools.github.io/hts-specs/VCFv4.2.pdf.
 """
 
-from __future__ import absolute_import
+
 
 from collections import namedtuple
 from copy import copy
@@ -349,7 +349,7 @@ class VcfParser(object):
       for header_line in self._header_lines[:-1]:
         header.add_line(header_line)
 
-      for k, v in header.info.iteritems():
+      for k, v in list(header.info.items()):
         # ID, Description, Type and Number are mandatory fields.
         if not k:
           raise ValueError('Corrupt ID at header line {}.'.format(v.id))
@@ -392,12 +392,12 @@ class VcfParser(object):
       header_lines = [line.strip() for line in header_lines if line.strip()]
       # Number='G' is to be deprecated and is unsupported by PySam - replace
       # with 'unknown' number identifier if found.
-      self._header_lines = filter(None, [line.strip().replace(
-          'Number=G', 'Number=.').encode('utf-8') for line in header_lines])
+      self._header_lines = [_f for _f in [line.strip().replace(
+          'Number=G', 'Number=.').encode('utf-8') for line in header_lines] if _f]
     else:
       self._init_with_header(header_lines)
 
-  def next(self):
+  def __next__(self):
     try:
       text_line = self._next_non_empty_line(self._text_lines)
     except StopIteration as e:
@@ -537,10 +537,10 @@ class PyVcfParser(VcfParser):
     if END_INFO_KEY not in record.INFO:
       return record.end
     end_info_value = record.INFO[END_INFO_KEY]
-    if isinstance(end_info_value, (int, long)):
+    if isinstance(end_info_value, int):
       return end_info_value
     if (isinstance(end_info_value, list) and len(end_info_value) == 1 and
-        isinstance(end_info_value[0], (int, long))):
+        isinstance(end_info_value[0], int)):
       return end_info_value[0]
     else:
       raise ValueError('Invalid END INFO field in record: {}'.format(
@@ -553,7 +553,7 @@ class PyVcfParser(VcfParser):
 
   def _get_variant_info(self, record):
     info = {}
-    for k, v in record.INFO.iteritems():
+    for k, v in list(record.INFO.items()):
       if k != END_INFO_KEY:
         info[k] = v
 
@@ -587,7 +587,7 @@ class PyVcfParser(VcfParser):
         # Note: this is already done for INFO fields in PyVCF.
         if (field in formats and
             formats[field].num not in (0, 1) and
-            isinstance(data, (int, float, long, basestring, bool))):
+            isinstance(data, (int, float, str, bool))):
           data = [data]
         call.info[field] = data
       calls.append(call)
@@ -644,7 +644,7 @@ class PySamParser(VcfParser):
     into_pysam = os.fdopen(pysam_read)
     self._to_child = os.fdopen(variants_write, 'w')
     self._vcf_reader = libcbcf.VariantFile(into_pysam, 'r')
-    self._original_info_list = self._vcf_reader.header.info.keys()
+    self._original_info_list = list(self._vcf_reader.header.info.keys())
 
   def _init_child_process(self, variants_read, pysam_write, header_lines):
     # Child process' task is to populate data into the pipe that feeds
@@ -777,7 +777,7 @@ class PySamParser(VcfParser):
     if value == '.' or value == b'.' or not value:
       return None
     # some times PySam returns unicode strings, encode them as strings instead.
-    elif isinstance(value, unicode):
+    elif isinstance(value, str):
       value = value.encode('utf-8')
     return self._parse_to_numeric(value) if numeric else str(value)
 
@@ -922,7 +922,7 @@ class NucleusParser(VcfParser):
         names=variant_proto.names[0].split(';') if variant_proto.names else [],
         # TODO(samanvp): ensure the default value (when missing) is set to -1.
         quality=variant_proto.quality,
-        filters=map(str, variant_proto.filter),
+        filters=list(map(str, variant_proto.filter)),
         info=self._get_variant_info(variant_proto),
         calls=self._get_variant_calls(variant_proto))
 
