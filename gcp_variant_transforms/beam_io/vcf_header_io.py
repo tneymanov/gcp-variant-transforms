@@ -256,9 +256,9 @@ class VcfHeaderSource(filebasedsource.FileBasedSource):
   def _read_headers(self, file_path):
     with self.open_file(file_path) as file_to_read:
       while True:
-        record = file_to_read.readline()
+        record = file_to_read.readline().decode('utf-8')
         while record and not record.strip():  # Skip empty lines.
-          record = file_to_read.readline()
+          record = file_to_read.readline().decide('utf-8')
         if record and record.startswith('#'):
           yield record.strip()
         else:

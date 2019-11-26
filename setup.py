@@ -37,8 +37,6 @@ REQUIRED_PACKAGES = [
     # 'pip install .' as it ignores conflicting versions. See Issue #71.
     'google-api-python-client>=1.6',
     'intervaltree>=2.1.0,<2.2.0',
-    'pyvcf<0.7.0',
-    'google-nucleus==0.2.0',
     # Nucleus needs uptodate protocol buffer compiler (protoc).
     'protobuf>=3.6.1',
     'mmh3<2.6',
@@ -61,7 +59,7 @@ class CustomCommands(setuptools.Command):
     pass
 
   def RunCustomCommand(self, command_list):
-    print 'Running command: %s' % command_list
+    print('Running command: %s' % command_list)
     try:
       subprocess.call(command_list)
     except Exception as e:

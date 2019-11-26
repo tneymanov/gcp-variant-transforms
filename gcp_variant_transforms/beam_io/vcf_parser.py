@@ -146,7 +146,8 @@ class Variant(object):
     other_vars = vars(other)
     for key in sorted(self_vars):
       if self_vars[key] != other_vars[key]:
-        return self_vars[key] < other_vars[key]
+        return (other_vars[key] is not None and
+                (self_vars[key] is None or self_vars[key] < other_vars[key]))
 
     return False
 

@@ -92,7 +92,7 @@ class _ToVcfRecordCoder(coders.Coder):
       return MISSING_FIELD_VALUE
     elif isinstance(value, list):
       return ','.join([self._encode_value(x) for x in value])
-    return value.encode('utf-8') if isinstance(value, str) else str(value)
+    return value.decode('utf-8') if isinstance(value, bytes) else str(value)
 
   def _encode_variant_info(self, variant):
     """Encodes the info of a :class:`Variant` for a VCF file line."""
