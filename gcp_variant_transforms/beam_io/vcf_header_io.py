@@ -14,7 +14,7 @@
 
 """A source for reading VCF file headers."""
 
-from __future__ import absolute_import
+
 
 import collections
 from functools import partial
@@ -158,7 +158,7 @@ class VcfHeader(object):
     # type: (...) -> OrderedDict[str, OrderedDict[str, Any]]
     self._verify_header(infos, is_format=False)
     results = collections.OrderedDict()
-    for info_id, field in infos.items():
+    for info_id, field in list(infos.items()):
       result = collections.OrderedDict()
       result[VcfParserHeaderKeyConstants.ID] = info_id
       result[VcfParserHeaderKeyConstants.NUM] = (
@@ -185,7 +185,7 @@ class VcfHeader(object):
                    filters):  # type: Dict[str, VariantHeaderMetadata]
     # type: (...) -> OrderedDict[str, OrderedDict[str, Any]]
     results = collections.OrderedDict()
-    for filter_id, field in filters.items():
+    for filter_id, field in list(filters.items()):
       result = collections.OrderedDict()
       result[VcfParserHeaderKeyConstants.ID] = filter_id
       result[VcfParserHeaderKeyConstants.DESC] = (
@@ -200,7 +200,7 @@ class VcfHeader(object):
                 alts):  # type: Dict[str, VariantHeaderMetadata]
     # type: (...) -> OrderedDict[str, OrderedDict[str, Any]]
     results = collections.OrderedDict()
-    for alt_id, field in alts.items():
+    for alt_id, field in list(alts.items()):
       result = collections.OrderedDict()
       result[VcfParserHeaderKeyConstants.ID] = alt_id
       result[VcfParserHeaderKeyConstants.DESC] = (
@@ -213,7 +213,7 @@ class VcfHeader(object):
     # type: (...) -> OrderedDict[str, OrderedDict[str, Any]]
     self._verify_header(formats, is_format=True)
     results = collections.OrderedDict()
-    for format_id, field in formats.items():
+    for format_id, field in list(formats.items()):
       result = collections.OrderedDict()
       result[VcfParserHeaderKeyConstants.ID] = format_id
       result[VcfParserHeaderKeyConstants.NUM] = (
@@ -231,7 +231,7 @@ class VcfHeader(object):
                    contigs):  # type: Dict[str, VariantHeaderMetadata]
     # type: (...) -> OrderedDict[str, OrderedDict[str, Any]]
     results = collections.OrderedDict()
-    for contig_id, field in contigs.items():
+    for contig_id, field in list(contigs.items()):
       result = collections.OrderedDict()
       result[VcfParserHeaderKeyConstants.ID] = contig_id
       result[VcfParserHeaderKeyConstants.LENGTH] = field.length
@@ -252,7 +252,7 @@ class VcfHeader(object):
   def _verify_header(self, fields, is_format):
     """Verifies the integrity of INFO and FORMAT fields"""
     # type: (Dict[str, VariantHeaderMetadata], bool) -> None
-    for header_id, field in fields.iteritems():
+    for header_id, field in list(fields.items()):
       # ID, Description, Type and Number are mandatory fields.
       if not header_id:
         raise ValueError('Corrupt ID at header line {}.'.format(field.id))
@@ -483,7 +483,7 @@ class WriteVcfHeaderFn(beam.DoFn):
       headers: Each value of headers is a dictionary that describes a single VCF
         header line.
     """
-    for header in headers.values():
+    for header in list(headers.values()):
       self._file_to_write.write(
           self._to_vcf_header_line(header_type, header))
 
@@ -514,7 +514,7 @@ class WriteVcfHeaderFn(beam.DoFn):
       A formatted string composed of header keys and values.
     """
     formatted_values = []
-    for key, value in header.iteritems():
+    for key, value in list(header.items()):
       if self._should_include_key_value(key, value):
         formatted_values.append(self._format_header_key_value(key, value))
     return ','.join(formatted_values)
@@ -585,7 +585,7 @@ class WriteVcfHeaderFn(beam.DoFn):
 
   def _format_string_value(self, value):
     # type: (str, unicode) -> str
-    if isinstance(value, unicode):
+    if isinstance(value, str):
       return '"{}"'.format(value.encode('utf-8'))
     return '"{}"'.format(value)
 
