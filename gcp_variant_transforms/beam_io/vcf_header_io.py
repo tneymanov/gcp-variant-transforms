@@ -78,8 +78,8 @@ def CreateInfoField(info_id,
                     description='',
                     source=None,
                     version=None):
-  """Creates mock PySam INFO object."""
   # type: (str, Any, str, str, str, str) -> VariantHeaderMetadata
+  """Creates mock PySam INFO object."""
   return VariantHeaderMetadataMock(
       info_id,
       {
@@ -93,8 +93,8 @@ def CreateInfoField(info_id,
       })
 
 def CreateFormatField(info_id, number, info_type, description=''):
-  """Creates mock PySam FORMAT object."""
   # type: (str, Any, str, str) -> VariantHeaderMetadata
+  """Creates mock PySam FORMAT object."""
   return VariantHeaderMetadataMock(info_id,
                                    {PysamHeaderKeyConstants.NUM: str(number),
                                     PysamHeaderKeyConstants.TYPE: info_type,
@@ -154,7 +154,8 @@ class VcfHeader(object):
                                                  self.formats,
                                                  self.contigs]])
   def _get_infos(self,
-                 infos):  # type: Dict[str, VariantHeaderMetadata]
+                 infos  # type: Dict[str, VariantHeaderMetadata]
+                ):
     # type: (...) -> OrderedDict[str, OrderedDict[str, Any]]
     self._verify_header(infos, is_format=False)
     results = collections.OrderedDict()
@@ -182,7 +183,8 @@ class VcfHeader(object):
     return results
 
   def _get_filters(self,
-                   filters):  # type: Dict[str, VariantHeaderMetadata]
+                   filters  # type: Dict[str, VariantHeaderMetadata]
+                  ):
     # type: (...) -> OrderedDict[str, OrderedDict[str, Any]]
     results = collections.OrderedDict()
     for filter_id, field in list(filters.items()):
@@ -197,7 +199,8 @@ class VcfHeader(object):
     return results
 
   def _get_alts(self,
-                alts):  # type: Dict[str, VariantHeaderMetadata]
+                alts  # type: Dict[str, VariantHeaderMetadata]
+               ):
     # type: (...) -> OrderedDict[str, OrderedDict[str, Any]]
     results = collections.OrderedDict()
     for alt_id, field in list(alts.items()):
@@ -209,7 +212,8 @@ class VcfHeader(object):
     return results
 
   def _get_formats(self,
-                   formats):  # type: Dict[str, VariantHeaderMetadata]
+                   formats  # type: Dict[str, VariantHeaderMetadata]
+                  ):
     # type: (...) -> OrderedDict[str, OrderedDict[str, Any]]
     self._verify_header(formats, is_format=True)
     results = collections.OrderedDict()
@@ -228,7 +232,8 @@ class VcfHeader(object):
     return results
 
   def _get_contigs(self,
-                   contigs):  # type: Dict[str, VariantHeaderMetadata]
+                   contigs  # type: Dict[str, VariantHeaderMetadata]
+                  ):
     # type: (...) -> OrderedDict[str, OrderedDict[str, Any]]
     results = collections.OrderedDict()
     for contig_id, field in list(contigs.items()):
@@ -250,8 +255,8 @@ class VcfHeader(object):
       return []
 
   def _verify_header(self, fields, is_format):
-    """Verifies the integrity of INFO and FORMAT fields"""
     # type: (Dict[str, VariantHeaderMetadata], bool) -> None
+    """Verifies the integrity of INFO and FORMAT fields"""
     for header_id, field in list(fields.items()):
       # ID, Description, Type and Number are mandatory fields.
       if not header_id:
@@ -329,9 +334,9 @@ class VcfHeaderSource(filebasedsource.FileBasedSource):
     with self.open_file(file_path) as file_to_read:
       record = None
       while True:
-        record = file_to_read.readline()
+        record = file_to_read.readline().decode('utf-8')
         while record and not record.strip():  # Skip empty lines.
-          record = file_to_read.readline()
+          record = file_to_read.readline().decode('utf-8')
         if record and record.startswith('#'):
           yield record.strip()
         else:
@@ -455,7 +460,7 @@ class WriteVcfHeaderFn(beam.DoFn):
   """A DoFn for writing VCF headers to a file."""
 
   HEADER_TEMPLATE = '##{}=<{}>\n'
-  FINAL_HEADER_LINE = '#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT\n'
+  FINAL_HEADER_LINE = b'#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT\n'
 
   def __init__(self, file_path):
     # type: (str) -> None
@@ -466,7 +471,7 @@ class WriteVcfHeaderFn(beam.DoFn):
     # type: (VcfHeader, str) -> None
     with FileSystems.create(self._file_path) as self._file_to_write:
       if vcf_version_line:
-        self._file_to_write.write(vcf_version_line)
+        self._file_to_write.write(vcf_version_line.encode('utf-8'))
       self._write_headers_by_type(HeaderTypeConstants.INFO, header.infos)
       self._write_headers_by_type(HeaderTypeConstants.FILTER, header.filters)
       self._write_headers_by_type(HeaderTypeConstants.ALT, header.alts)
@@ -485,7 +490,7 @@ class WriteVcfHeaderFn(beam.DoFn):
     """
     for header in list(headers.values()):
       self._file_to_write.write(
-          self._to_vcf_header_line(header_type, header))
+          self._to_vcf_header_line(header_type, header).encode('utf-8'))
 
   def _to_vcf_header_line(self, header_type, header):
     # type: (str, Dict[str, Union[str, int]]) -> str
@@ -585,8 +590,8 @@ class WriteVcfHeaderFn(beam.DoFn):
 
   def _format_string_value(self, value):
     # type: (str, unicode) -> str
-    if isinstance(value, str):
-      return '"{}"'.format(value.encode('utf-8'))
+    if isinstance(value, bytes):
+      return '"{}"'.format(value.decode('utf-8'))
     return '"{}"'.format(value)
 
 

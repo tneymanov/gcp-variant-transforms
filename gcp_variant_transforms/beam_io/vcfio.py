@@ -58,7 +58,6 @@ class _ToVcfRecordCoder(coders.Coder):
     encoded_info = self._encode_variant_info(variant)
     format_keys = self._get_variant_format_keys(variant)
     encoded_calls = self._encode_variant_calls(variant, format_keys)
-
     columns = [
         variant.reference_name,
         None if variant.start is None else variant.start + 1,
@@ -74,7 +73,7 @@ class _ToVcfRecordCoder(coders.Coder):
       columns.append(encoded_calls)
     columns = [self._encode_value(c) for c in columns]
 
-    return '\t'.join(columns) + '\n'
+    return ('\t'.join(columns) + '\n').encode('utf-8')
 
   def _encode_value(self, value):
     # type: (Any) -> str
@@ -83,7 +82,7 @@ class _ToVcfRecordCoder(coders.Coder):
       return MISSING_FIELD_VALUE
     elif isinstance(value, list):
       return ','.join([self._encode_value(x) for x in value])
-    return value.encode('utf-8') if isinstance(value, str) else str(value)
+    return value.decode('utf-8') if isinstance(value, bytes) else str(value)
 
   def _encode_variant_info(self, variant):
     """Encodes the info of a :class:`Variant` for a VCF file line."""
@@ -418,6 +417,7 @@ class WriteToVcf(PTransform):
     self._num_shards = num_shards
     self._compression_type = compression_type
     self._header = headers and '\n'.join([h.strip() for h in headers]) + '\n'
+    #self._header = headers and b'\n'.join([h.strip().encode('utf-8') for h in headers]) + b'\n'
 
   def expand(self, pcoll):
     return pcoll | 'WriteToVCF' >> textio.WriteToText(
