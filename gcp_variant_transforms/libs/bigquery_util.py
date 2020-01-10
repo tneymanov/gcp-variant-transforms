@@ -15,7 +15,6 @@
 """Constants and simple utility functions related to BigQuery."""
 
 import enum
-import exceptions
 import re
 from typing import List, Tuple, Union  # pylint: disable=unused-import
 
@@ -111,7 +110,7 @@ _BIG_QUERY_TYPE_TO_AVRO_TYPE_MAP = {
 _BIG_QUERY_TYPE_TO_PYTHON_TYPE_MAP = {
     TableFieldConstants.TYPE_INTEGER: int,
     # Bigquery accepts unicode for strings.
-    TableFieldConstants.TYPE_STRING: unicode,
+    TableFieldConstants.TYPE_STRING: str,
     TableFieldConstants.TYPE_FLOAT: float,
     TableFieldConstants.TYPE_BOOLEAN: bool,
 }
