@@ -225,8 +225,9 @@ class BigQueryWriteOptions(VariantTransformsOptions):
                                                       dataset_id)
       all_output_tables = []
       all_output_tables.append(
-          sample_info_table_schema_generator.compose_table_name(
-              table_id, sample_info_table_schema_generator.TABLE_SUFFIX))
+          bigquery_util.compose_table_name(
+              table_id,
+              sample_info_table_schema_generator.TABLE_SUFFIX, is_sample=True))
       sharding = variant_sharding.VariantSharding(
           parsed_args.sharding_config_path)
       num_shards = sharding.get_num_shards()
@@ -236,8 +237,7 @@ class BigQueryWriteOptions(VariantTransformsOptions):
       for i in range(num_shards):
         table_suffix = sharding.get_output_table_suffix(i)
         all_output_tables.append(
-            sample_info_table_schema_generator.compose_table_name(
-                table_id, table_suffix))
+            bigquery_util.compose_table_name(table_id, table_suffix))
 
       for output_table in all_output_tables:
         if parsed_args.append:
