@@ -332,11 +332,6 @@ def _merge_headers(known_args, pipeline_args,
     headers = pipeline_common.read_headers(
         p, pipeline_mode,
         known_args.all_patterns)
-    _ = (headers | 'SampleInfoToBigQuery' >>
-         sample_info_to_bigquery.SampleInfoToBigQuery(
-             known_args.output_table,
-             SampleNameEncoding[known_args.sample_name_encoding],
-             known_args.append))
     merged_header = pipeline_common.get_merged_headers(
         headers,
         known_args.split_alternate_allele_info_fields,
@@ -392,6 +387,24 @@ def _run_annotation_pipeline(known_args, pipeline_args):
                                                 known_args,
                                                 pipeline_args)
   return annotated_vcf_pattern
+
+
+
+
+def _create_sample_info_table(pipeline,  # type: beam.Pipeline
+                              pipeline_mode,  # type: PipelineModes
+                              known_args,  # type: argparse.Namespace
+                             ):
+  # type: (...) -> None
+  headers = pipeline_common.read_headers(
+      pipeline,
+      pipeline_mode,
+      known_args.all_patterns)
+  _ = (headers | 'SampleInfoToBigQuery' >>
+       sample_info_to_bigquery.SampleInfoToBigQuery(
+           known_args.output_table,
+           SampleNameEncoding[known_args.sample_name_encoding],
+           known_args.append))
 
 
 def run(argv=None):
@@ -472,7 +485,6 @@ def run(argv=None):
         schema_converter.convert_table_schema_to_json_bq_schema(schema))
     with filesystems.FileSystems.create(schema_file) as file_to_write:
       file_to_write.write(schema_json)
-
     for i in range(num_shards):
       table_suffix = sharding.get_output_table_suffix(i)
       table_name = bigquery_util.compose_table_name(
@@ -482,6 +494,11 @@ def run(argv=None):
             table_name,
             sharding.get_output_table_total_base_pairs(i),
             schema_file)
+    _create_sample_info_table(pipeline, pipeline_mode, known_args)
+    for i in range(num_shards):
+      table_suffix = sharding.get_output_table_suffix(i)
+      table_name = bigquery_util.compose_table_name(
+          known_args.output_table, table_suffix)
       _ = (variants[i] | 'VariantToBigQuery' + table_suffix >>
            variant_to_bigquery.VariantToBigQuery(
                table_name,
