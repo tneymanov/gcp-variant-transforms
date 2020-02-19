@@ -54,6 +54,7 @@ from apache_beam.io.gcp import bigquery
 from apache_beam.io.gcp.internal.clients import bigquery as bigquery_v2
 from apache_beam.options import pipeline_options
 
+from google.cloud import bigquery
 from oauth2client import client
 
 from gcp_variant_transforms import pipeline_common
@@ -87,6 +88,7 @@ def run(argv=None):
   known_args, pipeline_args = pipeline_common.parse_args(argv,
                                                          _COMMAND_LINE_OPTIONS)
   options = pipeline_options.PipelineOptions(pipeline_args)
+  client = bigquery.Client()
   is_direct_runner = pipeline_common.is_pipeline_direct_runner(
       beam.Pipeline(options=options))
   google_cloud_options = options.view_as(pipeline_options.GoogleCloudOptions)
