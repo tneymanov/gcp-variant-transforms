@@ -43,6 +43,7 @@ import argparse
 import enum
 import os
 import sys
+import time
 from datetime import datetime
 from typing import Dict, List  # pylint: disable=unused-import
 
@@ -118,8 +119,21 @@ class QueryAssertion(object):
     self._expected_result = expected_result
 
   def run_assertion(self):
-    query_job = self._client.query(self._query)
-    iterator = query_job.result(timeout=30)
+    count = 0
+    iterator = None
+    while count < 3:
+      try:
+        query_job = self._client.query(self._query)
+        iterator = query_job.result(timeout=300)
+        break
+      except:
+        print('\n\n\\n\n\nFIND ME\n\n\n')
+        print('self._query: {}'.format(self._query))
+        count += 1
+        if count < 3:
+          time.sleep(60)
+        else:
+          raise
     rows = list(iterator)
     if len(rows) != 1:
       raise run_tests_common.TestCaseFailure(
