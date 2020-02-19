@@ -497,7 +497,11 @@ def run(argv=None):
     _create_sample_info_table(pipeline, pipeline_mode, known_args)
     for i in range(num_shards):
       table_suffix = sharding.get_output_table_suffix(i)
+<<<<<<< HEAD
       table_name = bigquery_util.compose_table_name(
+=======
+      table_name = sample_info_table_schema_generator.compose_table_name(
+>>>>>>> 2d7f693... test
           known_args.output_table, table_suffix)
       _ = (variants[i] | 'VariantToBigQuery' + table_suffix >>
            variant_to_bigquery.VariantToBigQuery(
