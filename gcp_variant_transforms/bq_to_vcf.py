@@ -67,14 +67,24 @@ from gcp_variant_transforms.options import variant_transform_options
 from gcp_variant_transforms.transforms import bigquery_to_variant
 from gcp_variant_transforms.transforms import combine_sample_ids
 from gcp_variant_transforms.transforms import densify_variants
+from gcp_variant_transforms.transforms import sample_table_to_dict
+
 
 
 _BASE_QUERY_TEMPLATE = 'SELECT {COLUMNS} FROM `{INPUT_TABLE}`'
 _BQ_TO_VCF_SHARDS_JOB_NAME = 'bq-to-vcf-shards'
 _COMMAND_LINE_OPTIONS = [variant_transform_options.BigQueryToVcfOptions]
+_FULL_INPUT_TABLE = '{TABLE}__{SUFFIX}'
+_SAMPLE_INFO_TABLE = '{TABLE}_sample_info'
 _GENOMIC_REGION_TEMPLATE = ('({REFERENCE_NAME_ID}="{REFERENCE_NAME_VALUE}" AND '
                             '{START_POSITION_ID}>={START_POSITION_VALUE} AND '
                             '{END_POSITION_ID}<={END_POSITION_VALUE})')
+_SAMPLE_ENCODING_QUERY_TEMPLATE = (
+    'SELECT COUNT(DISTINCT sample_id)=COUNT(DISTINCT sample_name) '
+    'FROM `{INPUT_TABLE}_sample_info`')
+_SAMPLE_INFO_QUERY_TEMPLATE = (
+    'SELECT sample_id, sample_name, file_path '
+    'FROM `{INPUT_TABLE}_sample_info`')
 _VCF_FIXED_COLUMNS = ['#CHROM', 'POS', 'ID', 'REF', 'ALT', 'QUAL', 'FILTER',
                       'INFO', 'FORMAT']
 _VCF_VERSION_LINE = '##fileformat=VCFv4.3\n'
@@ -97,6 +107,7 @@ def run(argv=None):
                      'DataflowRunner.'.format(known_args.output_file))
   if is_direct_runner:
     known_args.number_of_bases_per_shard = sys.maxsize
+  _get_sample_hash_table(known_args, options)
 
   temp_folder = google_cloud_options.temp_location or tempfile.mkdtemp()
   unique_temp_id = pipeline_common.generate_unique_name(
@@ -144,6 +155,26 @@ def _write_vcf_meta_info(input_table,
           _get_schema(input_table), allow_incompatible_schema))
   write_header_fn = vcf_header_io.WriteVcfHeaderFn(representative_header_file)
   write_header_fn.process(header_fields, _VCF_VERSION_LINE)
+
+def _get_sample_hash_table(known_args, beam_pipeline_options):
+  sample_table = _SAMPLE_INFO_TABLE.format(TABLE=known_args.input_table)
+  #project_id, dataset_id, table_id = bigquery_util.parse_table_reference(
+  #    input_table)
+  query = _SAMPLE_INFO_QUERY_TEMPLATE.format(INPUT_TABLE=known_args.input_table)
+  bq_source = bigquery.BigQuerySource(query=query,
+                                      validate=True,
+                                      use_standard_sql=True)
+  hash_table = {}
+  with beam.Pipeline(options=beam_pipeline_options) as p:
+    hash_table = (
+        p
+        | 'ReadFromSampleTable' >> beam.io.Read(bq_source)
+        | 'SampleTableToDict' >> sample_table_to_dict.SampleTableToDict())
+  print('\n\n\nFIND ME')
+  print(hash_table)
+  raise ValueError('asdasd')
+
+  sample_table_to_dict.SampleTableToDict
 
 def _bigquery_to_vcf_shards(
     known_args,  # type: argparse.Namespace
@@ -225,16 +256,14 @@ def _get_bigquery_query(known_args, schema):
       INPUT_TABLE='.'.join(
           bigquery_util.parse_table_reference(known_args.input_table)))
   conditions = []
-  if known_args.genomic_regions:
-    for region in known_args.genomic_regions:
-      ref, start, end = genomic_region_parser.parse_genomic_region(region)
-      conditions.append(_GENOMIC_REGION_TEMPLATE.format(
-          REFERENCE_NAME_ID=bigquery_util.ColumnKeyConstants.REFERENCE_NAME,
-          REFERENCE_NAME_VALUE=ref,
-          START_POSITION_ID=bigquery_util.ColumnKeyConstants.START_POSITION,
-          START_POSITION_VALUE=start,
-          END_POSITION_ID=bigquery_util.ColumnKeyConstants.END_POSITION,
-          END_POSITION_VALUE=end))
+  ref, start, end = genomic_region_parser.parse_genomic_region(known_args.genomic_region)
+  conditions.append(_GENOMIC_REGION_TEMPLATE.format(
+      REFERENCE_NAME_ID=bigquery_util.ColumnKeyConstants.REFERENCE_NAME,
+      REFERENCE_NAME_VALUE=ref,
+      START_POSITION_ID=bigquery_util.ColumnKeyConstants.START_POSITION,
+      START_POSITION_VALUE=start,
+      END_POSITION_ID=bigquery_util.ColumnKeyConstants.END_POSITION,
+      END_POSITION_VALUE=end))
 
   if not conditions:
     return base_query
