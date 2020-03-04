@@ -48,11 +48,70 @@ RUN apt-get update && apt-get install -y \
 
 # Install dependencies.
 RUN python -m pip install --upgrade pip && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: python -m pip install --upgrade virtualenv' && \
     python -m pip install --upgrade virtualenv && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: virtualenv /opt/gcp_variant_transforms/venv' && \
     virtualenv /opt/gcp_variant_transforms/venv && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: . /opt/gcp_variant_transforms/venv/bin/activate' && \
     . /opt/gcp_variant_transforms/venv/bin/activate && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: cd /opt/gcp_variant_transforms/src' && \
     cd /opt/gcp_variant_transforms/src && \
-    python -m pip install --upgrade .
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: python -m pip install grpcio-tools' && \
+    python -m pip install grpcio-tools && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: python -m pip install google' && \
+    python -m pip install google && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: python -m pip install protobuf' && \
+    python -m pip install protobuf && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: python -m pip install --upgrade .' && \
+    python -m pip install --upgrade . && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: git clone http://github.com/apache/beam apachebeam' && \
+    git clone http://github.com/apache/beam apachebeam && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: cd apachebeam' && \
+    cd apachebeam && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: cd sdks/python' && \
+    cd sdks/python && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: python -m pip uninstall -y apache-beam[gcp]' && \
+    python -m pip uninstall -y apache-beam[gcp] && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: cd /opt/gcp_variant_transforms/src' && \
+    cd /opt/gcp_variant_transforms/src && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: . /opt/gcp_variant_transforms/venv/bin/activate' && \
+    . /opt/gcp_variant_transforms/venv/bin/activate && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: python -m pip install --upgrade -e .[gcp,test]' && \
+    python -m pip install --upgrade -e .[gcp,test] && \
+    echo 'THE PATH!!!!!:' && \
+    pwd && \
+    echo 'COMMAND: echo APACHE INSTALLED BEAM' && \
+    echo 'APACHE INSTALLED BEAM'
 
 RUN printf '#!/bin/bash\n%s\n%s' \
       ". /opt/gcp_variant_transforms/venv/bin/activate && cd /opt/gcp_variant_transforms/src" \
