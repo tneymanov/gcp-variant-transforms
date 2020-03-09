@@ -72,6 +72,8 @@ from gcp_variant_transforms.transforms import variant_to_avro
 from gcp_variant_transforms.transforms import variant_to_bigquery
 from gcp_variant_transforms.transforms import write_variants_to_shards
 
+GVT_VERSION = '0.8.1'
+
 _COMMAND_LINE_OPTIONS = [
     variant_transform_options.VcfReadOptions,
     variant_transform_options.AvroWriteOptions,
@@ -492,7 +494,12 @@ def run(argv=None):
         pipeline_common.create_output_table(
             table_name,
             sharding.get_output_table_total_base_pairs(i),
-            schema_file)
+            schema_file,
+            known_args.output_table,
+            table_suffix,
+            num_shards,
+            GVT_VERSION,
+            ' '.join(argv or sys.argv))
       _ = (variants[i] | 'VariantToBigQuery' + table_suffix >>
            variant_to_bigquery.VariantToBigQuery(
                table_name,

@@ -20,6 +20,8 @@ from distutils.command.build import build as _build
 import os
 import setuptools
 
+GVT_VERSION = '0.8.1'
+
 PYSAM_DEPENDENCY_COMMANDS = [
     ['apt-get', 'update'],
     ['apt-get', '-y', 'install', 'autoconf', 'automake', 'gcc', 'libbz2-dev',
@@ -90,7 +92,7 @@ class build(_build):  # pylint: disable=invalid-name
 
 setuptools.setup(
     name='gcp_variant_transforms',
-    version='0.8.1',
+    version=GVT_VERSION,
     description=('Tool for transforming and processing VCF files in a '
                  'scalable manner based on Apache Beam'),
     author='Google',

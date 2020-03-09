@@ -51,6 +51,11 @@ SampleNameEncoding = vcf_parser.SampleNameEncoding
 
 _BQ_CREATE_PARTITIONED_TABLE_COMMAND = (
     'bq mk --table '
+    '--label project:{PROJECT_ID} '
+    '--label dataset:{DATASET_ID} '
+    '--label table:{TABLE_NAME} '
+    '--label chr:{CHROM} '
+    '--label total_shard_num:{TOTAL_SHARD_NUM} '
     '--range_partitioning=start_position,0,{TOTAL_BASE_PAIRS},{PARTITION_SIZE} '
     '--clustering_fields=start_position,end_position '
     '{FULL_TABLE_ID} {SCHEMA_FILE_PATH}')
@@ -338,8 +343,15 @@ def generate_unique_name(job_name):
                    str(uuid.uuid4())])
 
 
-def create_output_table(full_table_id, total_base_pairs, schema_file_path):
-  # type: (str, int, str) -> None
+def create_output_table(full_table_id,
+                        total_base_pairs,
+                        schema_file_path,
+                        input_table,
+                        chrom,
+                        num_shards,
+                        gvt_version,
+                        command):
+  # type: (str, int, str, str, str, int, str, str) -> None
   """Creates an integer range partitioned table using `bq mk table...` command.
 
   Since beam.io.BigQuerySink is unable to create an integer range partition
@@ -353,11 +365,19 @@ def create_output_table(full_table_id, total_base_pairs, schema_file_path):
   """
   (partition_size, total_base_pairs_enlarged) = (
       bigquery_util.calculate_optimal_partition_size(total_base_pairs))
+  project_id, dataset_id, table_name = bigquery_util.parse_table_reference(
+      input_table)
   bq_command = _BQ_CREATE_PARTITIONED_TABLE_COMMAND.format(
       TOTAL_BASE_PAIRS=total_base_pairs_enlarged,
       PARTITION_SIZE=partition_size,
       FULL_TABLE_ID=full_table_id,
-      SCHEMA_FILE_PATH=schema_file_path)
+      SCHEMA_FILE_PATH=schema_file_path,
+      PROJECT_ID=project_id,
+      DATASET_ID=dataset_id,
+      TABLE_NAME=table_name,
+      CHROM=chrom.replace('chr', '').lower(),
+      TOTAL_SHARD_NUM=num_shards,
+      GVT_VERSION=gvt_version)
   result = os.system(bq_command)
   if result != 0:
     raise ValueError(
