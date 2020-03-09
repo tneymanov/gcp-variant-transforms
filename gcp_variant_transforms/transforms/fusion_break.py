@@ -28,5 +28,5 @@ class FusionBreak(beam.PTransform):
   """
   def expand(self, pcoll):
     # Create an empty PCollection that depends on pcoll.
-    empty = pcoll | beam.FlatMap(lambda x: ())
-    return pcoll | beam.Map(lambda x, unused: x, beam.pvalue.AsIter(empty))
+    empty = pcoll | 'CreateEmptyPcol' >> beam.FlatMap(lambda x: ())
+    return pcoll | 'MapToFusion' >> beam.Map(lambda x, unused: x, beam.pvalue.AsIter(empty))
