@@ -97,6 +97,7 @@ class VcfToBQTestCase(run_tests_common.TestCaseInterface):
 
   def validate_result(self):
     """Runs queries against the output table and verifies results."""
+    time.sleep(180)
     client = bigquery.Client(project=self._project)
     query_formatter = QueryFormatter(self._dataset_id, self._table_id)
     for assertion_config in self._assertion_configs:
