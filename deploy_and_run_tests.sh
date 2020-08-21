@@ -116,6 +116,7 @@ check_dir() {
 # Arguments:
 #   It is expected that this is called with $@ of the main script.
 #################################################
+echo "TURTESTER!!!!"
 parse_args() {
   while [[ $# -gt 0 ]]; do
     if [[ "$1" = "${KEEP_IMAGE_OPT}" ]]; then
@@ -208,12 +209,13 @@ check_dir
 parse_args $@
 color_print "Arguments to be passed to the test script: " "${GREEN}"
 color_print "${TEST_ARGUMENTS}" "${GREEN}"
-
+echo "TURTESTER 2"
 if [[ -z "${image_tag}" ]]; then
   time_tag="$(date +%F-%H-%M-%S)"
   image_tag="test_${time_tag}"
 fi
 full_image_name="gcr.io/${project}/gcp-variant-transforms:${image_tag}"
+echo "TURTESTER 3"
 
 if [[ -z "${skip_build}" ]]; then
   color_print "Building the Docker image with tag ${image_tag}" "${GREEN}"
@@ -225,26 +227,49 @@ if [[ -z "${skip_build}" ]]; then
       --timeout '30m' \
       --substitutions _CUSTOM_TAG_NAME="${image_tag}" .
 fi
+echo "TURTESTER 4"
 
 # Running integration tests in a temporary virtualenv
 temp_dir="$(mktemp -d)"
 color_print "Setting up integration test environment in ${temp_dir}" "${GREEN}"
 # Since we have no prompt we need to disable prompt changing in virtualenv.
 export VIRTUAL_ENV_DISABLE_PROMPT="something"
-virtualenv "${temp_dir}"
+echo "TURTESTER 5"
+python3 -m venv "${temp_dir}"
+echo "TURTESTER 6"
 source ${temp_dir}/bin/activate;
 trap clean_up EXIT
+echo "TURTESTER 7"
+python --version
+python3 --version
+python3 -m pip install wheel
+echo "TURTESTER 8"
 if [[ -n "${run_unit_tests}" ]]; then
-  python -m pip install --upgrade .
-  python setup.py test
+  echo "TURTESTER 9"
+  python3 -m pip install --upgrade .
+  echo "TURTESTER 9.5"
+  python3 -m pip show pysam
+  echo "TURTESTER 10"
+  python3 setup.py test
 fi
-python -m pip install --upgrade .[int_test]
+echo "TURTESTER 10.5"
+python3 -m pip install --upgrade .[int_test]
 
+echo "TURTESTER 11"
 # Force an upgrade to avoid SSL certificate verification errors (issue #453).
-python -m pip install --upgrade httplib2
+python3 -m pip install --upgrade httplib2
+echo "supposedly installed, first (TURTESTER)"
+python3 -m pip show apache-beam
+python3 -m pip show pysam
+
+python3 -m pip install --upgrade .
+python3 -m pip install --upgrade httplib2
+echo "supposedly installed, second (TURTESTER)"
+python3 -m pip show apache-beam
+python3 -m pip show pysam
 
 color_print "Running integration tests against ${full_image_name}" "${GREEN}"
-python gcp_variant_transforms/testing/integration/run_vcf_to_bq_tests.py \
+python3 gcp_variant_transforms/testing/integration/run_vcf_to_bq_tests.py \
     --project "${project}" \
     --region "${region}" \
     --staging_location "gs://${gs_dir}/staging" \
@@ -253,7 +278,7 @@ python gcp_variant_transforms/testing/integration/run_vcf_to_bq_tests.py \
     --image "${full_image_name}" ${TEST_ARGUMENTS} &
 pid_vcf_to_bq="$!"
 if [[ -n "${run_preprocessor_tests}" ]]; then
-  python gcp_variant_transforms/testing/integration/run_preprocessor_tests.py \
+  python3 gcp_variant_transforms/testing/integration/run_preprocessor_tests.py \
       --project "${project}" \
       --region "${region}" \
       --staging_location "gs://${gs_dir}/staging" \

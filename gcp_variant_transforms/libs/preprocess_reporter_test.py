@@ -83,9 +83,9 @@ class PreprocessReporterTest(unittest.TestCase):
         preprocess_reporter._InconsistencyType.HEADER_CONFLICTS + '\n',
         preprocess_reporter._HeaderLine.CONFLICTS_HEADER + '\n',
         (preprocess_reporter._DELIMITER).join([
-            'NS', 'INFO', 'num=1 type=Float', 'file2', 'num=1 type=Float\n']),
+            'NS', 'INFO', 'num=1 type=Integer', 'file1', 'num=1 type=Float\n']),
         (preprocess_reporter._DELIMITER).join([
-            ' ', ' ', 'num=1 type=Integer', 'file1', ' \n']),
+            ' ', ' ', 'num=1 type=Float', 'file2', ' \n']),
         '\n'
     ]
     self._generate_report_and_assert_contents_equal(expected,

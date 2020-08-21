@@ -84,7 +84,7 @@ class VcfToBQTestCase(run_tests_common.TestCaseInterface):
             '--temp_location {}'.format(context.temp_location),
             '--job_name {}-{}'.format(test_name, self._dataset_id.replace('_',
                                                                           '-'))]
-    for k, v in kwargs.iteritems():
+    for k, v in kwargs.items():
       value = v
       if isinstance(v, basestring):
         value = v.format(TABLE_NAME=full_table_id)

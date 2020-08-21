@@ -15,7 +15,7 @@
 
 
 import apache_beam as beam
-import avro
+import fastavro
 
 from gcp_variant_transforms.beam_io import vcf_header_io  # pylint: disable=unused-import
 from gcp_variant_transforms.libs import bigquery_row_generator
@@ -59,8 +59,6 @@ class VariantToAvroFiles(beam.PTransform):
         to bigquery_util._DEFAULT_NULL_NUMERIC_VALUE_REPLACEMENT.
     """
     self._output_path = output_path
-    self._avro_schema = avro.schema.parse(
-        schema_converter.convert_table_schema_to_json_avro_schema(schema))
     self._bigquery_row_generator = (
         bigquery_row_generator.VariantCallRowGenerator(
             bigquery_schema_descriptor.SchemaDescriptor(schema),
@@ -70,6 +68,8 @@ class VariantToAvroFiles(beam.PTransform):
 
     self._allow_incompatible_records = allow_incompatible_records
     self._omit_empty_sample_calls = omit_empty_sample_calls
+    self._fastavro_schema = fastavro.parse_schema(
+        schema_converter.convert_schema_to_avro_dict(schema))
 
   def expand(self, pcoll):
     avro_records = pcoll | 'ConvertToAvroRecords' >> beam.ParDo(
@@ -79,4 +79,4 @@ class VariantToAvroFiles(beam.PTransform):
             self._omit_empty_sample_calls))
     return (avro_records
             | 'WriteToAvroFiles' >>
-            beam.io.WriteToAvro(self._output_path, self._avro_schema))
+            beam.io.WriteToAvro(self._output_path, self._fastavro_schema))

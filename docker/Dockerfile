@@ -21,6 +21,8 @@ RUN go get -ldflags '-extldflags "-fno-PIC -static"' -buildmode pie -tags 'osuse
 
 FROM google/cloud-sdk:slim
 
+FROM python:3.7
+
 COPY --from=0 /go/bin/pipelines /usr/bin
 
 ARG commit_sha
@@ -48,13 +50,18 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     python3-venv
 
+RUN python3 --version
+
+RUN echo '\n\n\nFIND ME\n\n'
+
 # Install dependencies.
-RUN 
 RUN python3 -m venv /opt/gcp_variant_transforms/venv3 && \
     . /opt/gcp_variant_transforms/venv3/bin/activate && \
     cd /opt/gcp_variant_transforms/src && \
-    python -m pip install --upgrade wheel \
-    python -m pip install --upgrade .
+    python3 -m pip install --upgrade pip && \
+    python3 -m pip install --upgrade wheel && \
+    python3 -m pip install --upgrade . && \
+    python3 -m pip show pysam
 
 RUN printf '#!/bin/bash\n%s\n%s' \
       ". /opt/gcp_variant_transforms/venv3/bin/activate && cd /opt/gcp_variant_transforms/src" \

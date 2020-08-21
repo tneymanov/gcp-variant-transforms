@@ -27,7 +27,7 @@ PYSAM_DEPENDENCY_COMMANDS = [
      'zlib1g-dev']
 ]
 
-PYSAM_INSTALLATION_COMMAND = ['pip', 'install', 'pysam<0.16.0']
+PYSAM_INSTALLATION_COMMAND = ['python3', '-m', 'pip', 'install', 'pysam<0.16.0']
 
 REQUIRED_PACKAGES = [
     'cython>=0.28.1',
@@ -38,7 +38,7 @@ REQUIRED_PACKAGES = [
     'google-api-python-client>=1.6,<1.7.12',
     'intervaltree>=2.1.0,<2.2.0',
     'mmh3<2.6',
-    'google-cloud-storage',
+    'google-cloud-storage<1.30.0',
     'pyfarmhash',
     'pyyaml'
 ]
@@ -64,12 +64,16 @@ class CustomCommands(setuptools.Command):
       raise RuntimeError('Command %s failed with error: %s' % (command_list, e))
 
   def run(self):
+    print('RUNNING RUN (TURTESTER)')
     try:
       # For superuser UID is 0, so attempt to install pysam's C dependencies.
+      print(os.getuid())
       if not os.getuid():
+        print('In If (TURTESTER)')
         for command in PYSAM_DEPENDENCY_COMMANDS:
           self.RunCustomCommand(command)
       self.RunCustomCommand(PYSAM_INSTALLATION_COMMAND)
+      print('SUPPOSEDLY INSTALLED PYSAM (TURTESTER)')
 
     except RuntimeError:
       raise RuntimeError(
@@ -104,8 +108,8 @@ setuptools.setup(
         'Topic :: Scientific/Engineering :: Information Analysis',
         'Topic :: System :: Distributed Computing',
         'License :: OSI Approved :: Apache Software License',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.7',
     ],
 
     setup_requires=REQUIRED_SETUP_PACKAGES,
