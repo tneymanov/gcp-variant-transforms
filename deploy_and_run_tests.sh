@@ -234,6 +234,19 @@ temp_dir="$(mktemp -d)"
 color_print "Setting up integration test environment in ${temp_dir}" "${GREEN}"
 # Since we have no prompt we need to disable prompt changing in virtualenv.
 export VIRTUAL_ENV_DISABLE_PROMPT="something"
+apt-get update && apt-get install -y \
+    autoconf \
+    automake \
+    gcc \
+    libbz2-dev \
+    libcurl4-openssl-dev \
+    liblzma-dev \
+    libssl-dev \
+    make \
+    perl \
+    zlib1g-dev \
+    python3-pip \
+    python3-venv
 echo "TURTESTER 5"
 python3 -m venv "${temp_dir}"
 echo "TURTESTER 6"
@@ -242,6 +255,11 @@ trap clean_up EXIT
 echo "TURTESTER 7"
 python --version
 python3 --version
+echo "TURTESTER 7.5"
+python3 -m pip install --upgrade venv
+python3 -m pip show venv
+python3 -m pip install --upgrade pip
+echo "TURTESTER 7.7"
 python3 -m pip install wheel
 echo "TURTESTER 8"
 if [[ -n "${run_unit_tests}" ]]; then
@@ -253,17 +271,17 @@ if [[ -n "${run_unit_tests}" ]]; then
   python3 setup.py test
 fi
 echo "TURTESTER 10.5"
-python3 -m pip install --upgrade .[int_test]
+python3 -m pip install --upgrade .
+echo "TURTESTER 10.7"
+python3 -m pip install pysam<0.16.0
 
 echo "TURTESTER 11"
 # Force an upgrade to avoid SSL certificate verification errors (issue #453).
 python3 -m pip install --upgrade httplib2
 echo "supposedly installed, first (TURTESTER)"
 python3 -m pip show apache-beam
+echo "TURTESTER 11.5"
 python3 -m pip show pysam
-
-python3 -m pip install --upgrade .
-python3 -m pip install --upgrade httplib2
 echo "supposedly installed, second (TURTESTER)"
 python3 -m pip show apache-beam
 python3 -m pip show pysam

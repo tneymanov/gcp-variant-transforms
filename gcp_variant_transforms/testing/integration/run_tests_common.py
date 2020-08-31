@@ -186,7 +186,11 @@ def _load_test_configs(filename, required_keys):
   # type: (str, List[str]) -> List[Dict]
   """Loads an integration test JSON object from a file."""
   with open(filename, 'r') as f:
-    tests = json.loads(f.read())
+    k = f.read()
+    print('\n\n\nFIND ME TURTURAL')
+    print(k)
+    tests = json.loads(k)
+    print(tests)
     _validate_test_configs(tests, filename, required_keys)
     return tests
 

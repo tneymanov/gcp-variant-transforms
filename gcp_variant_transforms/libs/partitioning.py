@@ -19,6 +19,7 @@ import logging
 import math
 import os
 import time
+import subprocess
 
 from google.cloud import bigquery
 
@@ -357,6 +358,10 @@ def create_bq_table(full_table_id, schema_file_path, partition_column=None,
         RANGE_INTERVAL=range_interval,
         FULL_TABLE_ID=full_table_id,
         SCHEMA_FILE_PATH=schema_file_path)
+    # delete below.
+    bq_command = _BQ_CREATE_TABLE_COMMAND.format(
+        FULL_TABLE_ID=full_table_id,
+        SCHEMA_FILE_PATH=schema_file_path)
   else:
     bq_command = _BQ_CREATE_TABLE_COMMAND.format(
         FULL_TABLE_ID=full_table_id,
@@ -366,11 +371,17 @@ def create_bq_table(full_table_id, schema_file_path, partition_column=None,
 
 
 def _run_table_creation_command(bq_command):
-  result = os.system(bq_command)
+  print('\n\n TIME TO FIND ME')
+  print(bq_command.split(' '))
+  result = subprocess.call(bq_command, shell=True)
+  print(result)
   if result != 0:
+    logging.warning('FIND ME PLEASE TURTESTER')
+    logging.warning(result)
+    logging.warning(dir(result))
     time.sleep(30)  # In our integration tests sometime we overwhelm BQ server.
-    result_second_attempt = os.system(bq_command)
+    result_second_attempt = subprocess.call(bq_command.split(' '))
     if result_second_attempt != 0:
       raise ValueError(
-          'Failed to create a BigQuery table using "{}" command.'.format(
-              bq_command))
+          'Failed to create a BigQuery table using "{}" command. ErrorCode: {}'.format(
+              bq_command, result))

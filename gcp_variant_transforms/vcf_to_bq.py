@@ -427,11 +427,15 @@ def _write_schema_to_temp_file(schema, path):
 def _get_avro_root_path(beam_pipeline_options):
   google_cloud_options = beam_pipeline_options.view_as(
       pipeline_options.GoogleCloudOptions)
-  return filesystems.FileSystems.join(google_cloud_options.temp_location,
-                                      _AVRO_FOLDER,
-                                      google_cloud_options.job_name,
-                                      datetime.now().strftime('%Y%m%d_%H%M%S'),
-                                      '')
+  temp_name = filesystems.FileSystems.join(
+      google_cloud_options.temp_location,
+      _AVRO_FOLDER,
+      google_cloud_options.job_name,
+      datetime.now().strftime('%Y%m%d_%H%M%S'),
+      '')
+  logging.warning("\n\nFIND ME BEG YOU")
+  logging.warning(temp_name)
+  return temp_name
 
 def run(argv=None):
   # type: (List[str]) -> None

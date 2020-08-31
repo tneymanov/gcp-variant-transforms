@@ -18,6 +18,7 @@ import enum
 import logging
 import os
 import re
+import subprocess
 import time
 from typing import List, Tuple, Union  # pylint: disable=unused-import
 
@@ -369,7 +370,7 @@ def get_table_base_name(table_name):
 
 def delete_table(full_table_id):
   bq_command = _BQ_DELETE_TABLE_COMMAND.format(FULL_TABLE_ID=full_table_id)
-  return os.system(bq_command)
+  return subprocess.call(bq_command.split(' '))
 
 
 def rollback_newly_created_tables(newly_created_tables):
@@ -382,4 +383,4 @@ def rollback_newly_created_tables(newly_created_tables):
 
 def delete_gcs_files(root_path):
   gcs_command = _GCS_DELETE_FILES_COMMAND.format(ROOT_PATH=root_path)
-  return os.system(gcs_command)
+  return subprocess.call(gcs_command.split(' '))

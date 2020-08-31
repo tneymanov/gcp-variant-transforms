@@ -239,7 +239,8 @@ class TestContextManager(object):
       client = bigquery.Client(project=self.project)
       dataset_ref = client.dataset(self.dataset_id)
       dataset = bigquery.Dataset(dataset_ref)
-      client.delete_dataset(dataset, delete_contents=True)
+      # delete me
+      #client.delete_dataset(dataset, delete_contents=True)
 
 
 def _get_args():

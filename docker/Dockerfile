@@ -21,7 +21,9 @@ RUN go get -ldflags '-extldflags "-fno-PIC -static"' -buildmode pie -tags 'osuse
 
 FROM google/cloud-sdk:slim
 
-FROM python:3.7
+RUN python3 --version
+
+RUN whereis python3.7
 
 COPY --from=0 /go/bin/pipelines /usr/bin
 
@@ -34,8 +36,9 @@ ADD / /opt/gcp_variant_transforms/src/
 # Needed for installing mmh3 (one of the required packages in setup.py).
 RUN apt install -y g++
 
-# Install Pysam dependencies. These dependencies are only required becuase we
+# Install Pysam dependencies. These dependencies are only required because we
 # have a monolithic binary - they primarily have to be installed on the workers.
+
 RUN apt-get update && apt-get install -y \
     autoconf \
     automake \
@@ -47,10 +50,12 @@ RUN apt-get update && apt-get install -y \
     make \
     perl \
     zlib1g-dev \
+    libc6-dev \
     python3-pip \
     python3-venv
 
 RUN python3 --version
+RUN python3.7 --version
 
 RUN echo '\n\n\nFIND ME\n\n'
 
@@ -62,6 +67,8 @@ RUN python3 -m venv /opt/gcp_variant_transforms/venv3 && \
     python3 -m pip install --upgrade wheel && \
     python3 -m pip install --upgrade . && \
     python3 -m pip show pysam
+
+
 
 RUN printf '#!/bin/bash\n%s\n%s' \
       ". /opt/gcp_variant_transforms/venv3/bin/activate && cd /opt/gcp_variant_transforms/src" \
