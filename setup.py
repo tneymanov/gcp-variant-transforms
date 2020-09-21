@@ -18,6 +18,7 @@ import subprocess
 from distutils.command.build import build as _build
 
 import os
+import time
 import setuptools
 
 PYSAM_DEPENDENCY_COMMANDS = [
@@ -38,7 +39,7 @@ REQUIRED_PACKAGES = [
     'google-api-python-client>=1.6,<1.7.12',
     'intervaltree>=2.1.0,<2.2.0',
     'mmh3<2.6',
-    'google-cloud-storage',
+    'google-cloud-storage<1.30.0',
     'pyfarmhash',
     'pyyaml'
 ]
@@ -63,7 +64,7 @@ class CustomCommands(setuptools.Command):
     except Exception as e:
       raise RuntimeError('Command %s failed with error: %s' % (command_list, e))
 
-  def run(self):
+  def do_install(self):
     try:
       # For superuser UID is 0, so attempt to install pysam's C dependencies.
       if not os.getuid():
@@ -76,6 +77,34 @@ class CustomCommands(setuptools.Command):
           'PySam installation has failed. Make sure you have the ' + \
           'following packages installed: autoconf automake gcc libbz2-dev ' + \
           'liblzma-dev libcurl4-openssl-dev libssl-dev make perl zlib1g-dev')
+
+  def run(self):
+
+    # When running vcf_to_bq under with Dataflow cost optimizations:
+    #   --flexrs_goal=COST_OPTIMIZED \
+    #   --runner DataflowRunner
+    #
+    # It was observed that new workers would fail with:
+    #   <snip>
+    #   File "/usr/local/lib/python2.7/site-packages/pysam/__init__.py",
+    #     line 5, in <module>, from pysam.libchtslib import *
+    #   ImportError: No module named libchtslib
+    #
+    # Root cause for the failure has not been determined, but with the
+    # following retries, the problem has no longer been observed:
+
+    for _ in range(0,10):
+      try:
+        self.do_install()
+
+        # pylint: disable=import-outside-toplevel, unused-import
+        from pysam import libchtslib
+      except ImportError:
+        time.sleep(10)
+
+    # Try one more time before exiting; would rather fail here than downstream.
+    # pylint: disable=import-outside-toplevel, unused-import
+    from pysam import libchtslib
 
 class build(_build):  # pylint: disable=invalid-name
   """A build command class that will be invoked during package install.
