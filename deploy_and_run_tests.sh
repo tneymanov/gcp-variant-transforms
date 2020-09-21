@@ -229,8 +229,6 @@ fi
 # Running integration tests in a temporary virtualenv
 temp_dir="$(mktemp -d)"	
 color_print "Setting up integration test environment in ${temp_dir}" "${GREEN}"
-# Since we have no prompt we need to disable prompt changing in virtualenv.
-export VIRTUAL_ENV_DISABLE_PROMPT="something"
 python3 -m venv "${temp_dir}"
 sed -i 's/$1/${1:-}/' ${temp_dir}/bin/activate
 source ${temp_dir}/bin/activate;
